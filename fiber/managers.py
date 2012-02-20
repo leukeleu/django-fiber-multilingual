@@ -6,11 +6,13 @@ from django.utils.translation import ugettext, ugettext_lazy as _
 
 from mptt.managers import TreeManager
 
+from multilingual.db.models.manager import MultilingualManager
+
 from fiber import editor
 from fiber.utils.urls import get_named_url_from_quoted_url
 
 
-class ContentItemManager(models.Manager):
+class ContentItemManager(MultilingualManager):
 
     def get_content_groups(self):
         """

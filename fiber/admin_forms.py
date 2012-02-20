@@ -3,12 +3,14 @@ from django.utils.translation import ugettext_lazy as _
 
 from mptt.forms import TreeNodeChoiceField
 
+from multilingual.forms.forms import MultilingualModelForm
+
 from app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES
 from models import Page, ContentItem
 from utils.urls import is_quoted_url
 
 
-class ContentItemAdminForm(forms.ModelForm):
+class ContentItemAdminForm(MultilingualModelForm):
 
     class Meta:
         model = ContentItem

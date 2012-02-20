@@ -4,6 +4,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from mptt.admin import MPTTModelAdmin
 
+from multilingual.admin.options import MultilingualModelAdmin
+
 from fiber.editor import get_editor_field_name
 from app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES
 from models import Page, ContentItem, PageContentItem, Image, File
@@ -24,7 +26,7 @@ class ImageAdmin(admin.ModelAdmin):
     search_fields = ('title', )
 
 
-class ContentItemAdmin(admin.ModelAdmin):
+class ContentItemAdmin(MultilingualModelAdmin):
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
     fieldsets = (
@@ -90,7 +92,7 @@ class PageAdmin(MPTTModelAdmin):
     action_links.allow_tags = True
 
 
-class FiberAdminContentItemAdmin(fiber_admin.ModelAdmin):
+class FiberAdminContentItemAdmin(MultilingualModelAdmin):
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
 
