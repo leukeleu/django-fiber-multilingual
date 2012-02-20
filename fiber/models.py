@@ -9,6 +9,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from mptt.managers import TreeManager
 from mptt.models import MPTTModel
+from multilingual import languages
+from multilingual.db.models.base import MultilingualModel
 
 from app_settings import IMAGES_DIR, FILES_DIR, METADATA_PAGE_SCHEMA, METADATA_CONTENT_SCHEMA
 import managers
@@ -17,16 +19,18 @@ from utils.json import JSONField
 from utils.urls import get_named_url_from_quoted_url, is_quoted_url
 
 
-class ContentItem(models.Model):
+class ContentItem(MultilingualModel):
     created = models.DateTimeField(_('created'), auto_now_add=True)
     updated = models.DateTimeField(_('updated'), auto_now=True)
     name = models.CharField(_('name'), blank=True, max_length=255)
-    content_markup = FiberMarkupField(verbose_name=_('Content'))
-    content_html = FiberHTMLField(verbose_name=_('Content'))
     protected = models.BooleanField(_('protected'), default=False)
     metadata = JSONField(_('metadata'), blank=True, null=True, schema=METADATA_CONTENT_SCHEMA, prefill_from='fiber.models.ContentItem')
     template_name = models.CharField(_('template name'), blank=True, max_length=70)
     used_on_pages_data = JSONField(_('used on pages'), blank=True, null=True)
+
+    class Translation:
+        content_markup = FiberMarkupField(verbose_name=_('Content'))
+        content_html = FiberHTMLField(verbose_name=_('Content'))
 
     objects = managers.ContentItemManager()
 
@@ -50,7 +54,10 @@ class ContentItem(models.Model):
 
     def get_change_url(self):
         named_url = 'fiber_admin:%s_%s_change' % (self._meta.app_label, self._meta.object_name.lower())
-        return reverse(named_url, args=(self.id, ))
+        return '%s?language=%s' % (
+            reverse(named_url, args=(self.id,)),
+            languages.get_active()
+        )
 
     def set_used_on_pages_json(self):
         json_pages = []
