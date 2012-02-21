@@ -142,7 +142,7 @@ class PageContentItemManager(models.Manager):
                 resort()
 
 
-class PageManager(TreeManager):
+class PageManager(MultilingualManager):
 
     def link_parent_objects(self, pages):
         """

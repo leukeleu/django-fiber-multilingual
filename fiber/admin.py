@@ -42,7 +42,7 @@ class PageContentItemInline(admin.TabularInline):
     extra = 1
 
 
-class PageAdmin(MPTTModelAdmin):
+class PageAdmin(MultilingualModelAdmin):
 
     form = forms.PageForm
     fieldsets = (
@@ -111,7 +111,7 @@ class FiberAdminContentItemAdmin(MultilingualModelAdmin):
             )
 
 
-class FiberAdminPageAdmin(fiber_admin.MPTTModelAdmin):
+class FiberAdminPageAdmin(MultilingualModelAdmin):
 
     form = forms.PageForm
 

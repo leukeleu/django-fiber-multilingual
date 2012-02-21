@@ -21,7 +21,7 @@ class ContentItemAdminForm(MultilingualModelForm):
             self.fields['template_name'] = forms.ChoiceField(choices=CONTENT_TEMPLATE_CHOICES, required=False, label=_('Content template'))
 
 
-class PageForm(forms.ModelForm):
+class PageForm(MultilingualModelForm):
 
     parent = TreeNodeChoiceField(queryset=Page.tree.all(), level_indicator=3*unichr(160), empty_label='---------', required=False)
     redirect_page = TreeNodeChoiceField(label=_('Redirect page'), queryset=Page.objects.filter(redirect_page__isnull=True), level_indicator=3*unichr(160), empty_label='---------', required=False)

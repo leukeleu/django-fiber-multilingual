@@ -1842,7 +1842,7 @@ function reloadPage(params) {
 			url: '/api/v1/page/' + page_id + '/',
 			type: 'GET',
 			success: function(data) {
-				window.location.replace(data.data.attr.href);
+				window.location.replace(data.href);
 			},
 			error: function() {
 				if (params && params.error) {
