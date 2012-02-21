@@ -44,9 +44,10 @@ class PageHandler(BaseHandler):
     def read_page(self, page_id):
         page = Page.objects.get(id=page_id)
 
-        # Do not include the data of the child pages.
-        page.children = None
-        return page
+        return dict(
+            title=page.title,
+            href=page.get_absolute_url()
+        )
 
     def create(self, request):
         """

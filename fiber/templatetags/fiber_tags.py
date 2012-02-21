@@ -16,7 +16,7 @@ def show_menu(context, menu_name, min_level, max_level, expand=None):
     needed_pages = []
 
     try:
-        root_page = Page.objects.get(title=menu_name, parent=None)
+        root_page = Page.objects.get(title_en=menu_name, parent=None)
     except Page.DoesNotExist:
         raise Page.DoesNotExist("Menu does not exist.\nNo top-level page found with the title '%s'." % menu_name)
 

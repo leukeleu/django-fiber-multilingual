@@ -7,8 +7,9 @@ from django.utils import simplejson
 from django.utils.translation import ugettext
 from django.utils.translation import ugettext_lazy as _
 
+import mptt
 from mptt.managers import TreeManager
-from mptt.models import MPTTModel
+
 from multilingual import languages
 from multilingual.db.models.base import MultilingualModel
 
@@ -76,12 +77,11 @@ class ContentItem(MultilingualModel):
         return simplejson.dumps(self.used_on_pages_data)
 
 
-class Page(MPTTModel):
+class Page(MultilingualModel):
     created = models.DateTimeField(_('created'), auto_now_add=True)
     updated = models.DateTimeField(_('updated'), auto_now=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='subpages', verbose_name=_('parent'))
     # TODO: add keywords, description (as meta?)
-    title = models.CharField(_('title'), blank=True, max_length=255)
     url = FiberURLField(blank=True)
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', verbose_name=_('redirect page'), on_delete=models.SET_NULL)
     mark_current_regexes = models.TextField(_('mark current regexes'), blank=True)
@@ -93,6 +93,9 @@ class Page(MPTTModel):
     content_items = models.ManyToManyField(ContentItem, through='PageContentItem', verbose_name=_('content items'))
     metadata = JSONField(blank=True, null=True, schema=METADATA_PAGE_SCHEMA, prefill_from='fiber.models.Page')
 
+    class Translation:
+        title = models.CharField(_('title'), blank=True, max_length=255)
+
     tree = TreeManager()
     objects = managers.PageManager()
 
@@ -102,7 +105,7 @@ class Page(MPTTModel):
         ordering = ('tree_id', 'lft')
 
     def __unicode__(self):
-        return self.title
+        return self.title_en
 
     def save(self, *args, **kwargs):
         if self.id:
@@ -142,7 +145,10 @@ class Page(MPTTModel):
 
     def get_change_url(self):
         named_url = 'fiber_admin:%s_%s_change' % (self._meta.app_label, self._meta.object_name.lower())
-        return reverse(named_url, args=(self.id, ))
+        return '%s?language=%s' % (
+            reverse(named_url, args=(self.id,)),
+            languages.get_active()
+        )
 
     def get_content_for_block(self, block_name):
         """
@@ -233,6 +239,8 @@ class Page(MPTTModel):
 
     def is_public_for_user(self, user):
         return user.is_staff or self.is_public
+
+mptt.register(Page)
 
 
 class PageContentItem(models.Model):
