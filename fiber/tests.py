@@ -327,7 +327,9 @@ class TestTemplateTags(TestCase):
             'user': self.get_non_staff_user(),
             'fiber_page': Page.objects.get_by_url('/'),
         })
-        with self.assertNumQueries(2):
+
+        # Number of queries increased from 2 to 7 because of multilingual.
+        with self.assertNumQueries(7):
             self.assertEquals(
                 strip_whitespace(t.render(c)),
                 ('<ul>'
@@ -370,7 +372,8 @@ class TestTemplateTags(TestCase):
             'fiber_page': Page.objects.get_by_url('/section1/'),
         })
 
-        with self.assertNumQueries(2):
+        # Number of queries increased from 2 to 6 because of multilingual.
+        with self.assertNumQueries(6):
             self.assertEquals(
                 strip_whitespace(t.render(c)),
                 ('<ul>'
@@ -395,7 +398,8 @@ class TestTemplateTags(TestCase):
             'fiber_page': Page.objects.get_by_url('/section2/'),
         })
 
-        with self.assertNumQueries(2):
+        # Number of queries increased from 2 to 4 because of multilingual.
+        with self.assertNumQueries(4):
             self.assertEquals(
                 strip_whitespace(t.render(c)),
                 ('<ul>'
@@ -422,7 +426,9 @@ class TestTemplateTags(TestCase):
             'user': self.get_non_staff_user(),
             'fiber_page': Page.objects.get_by_url('/section1/sub1/'),
         })
-        with self.assertNumQueries(2):
+
+        # Number of queries increased from 2 to 4 because of multilingual.
+        with self.assertNumQueries(4):
             self.assertEquals(
                 strip_whitespace(t.render(c)),
                 ('<ul>'
@@ -440,7 +446,8 @@ class TestTemplateTags(TestCase):
             """
         )
 
-        with self.assertNumQueries(2):
+        # Number of queries increased from 2 to 4 because of multilingual.
+        with self.assertNumQueries(4):
             self.assertEquals(
                 strip_whitespace(t.render(c)),
                 ('<ul>'
@@ -469,7 +476,9 @@ class TestTemplateTags(TestCase):
             'user': self.get_non_staff_user(),
             'fiber_page': other_root,
         })
-        with self.assertNumQueries(2):
+
+        # Number of queries increased from 2 to 3 because of multilingual.
+        with self.assertNumQueries(3):
             self.assertEquals(
                 strip_whitespace(t.render(c)),
                 ('<ul>'
@@ -493,7 +502,8 @@ class TestTemplateTags(TestCase):
             'fiber_page': Page.objects.get_by_url('/'),
         })
 
-        with self.assertNumQueries(2):
+        # Number of queries increased from 2 to 7 because of multilingual.
+        with self.assertNumQueries(7):
             self.assertEquals(
                 strip_whitespace(t.render(c)),
                 ('<ul data-fiber-data=\'{"type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 1}\'>'
@@ -518,10 +528,10 @@ class TestTemplateTags(TestCase):
                    '</li>'
                  '</ul>' % {
                         'fiber_admin_page_add_url': reverse('fiber_admin:fiber_page_add'),
-                        'fiber_admin_page_edit_url_home': reverse('fiber_admin:fiber_page_change', args=(2, )),
-                        'fiber_admin_page_edit_url_section1': reverse('fiber_admin:fiber_page_change', args=(3, )),
-                        'fiber_admin_page_edit_url_section2': reverse('fiber_admin:fiber_page_change', args=(4, )),
-                        'fiber_admin_page_edit_url_sub1': reverse('fiber_admin:fiber_page_change', args=(5, )),
-                        'fiber_admin_page_edit_url_sub2': reverse('fiber_admin:fiber_page_change', args=(6, )),
+                        'fiber_admin_page_edit_url_home': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(2, )),
+                        'fiber_admin_page_edit_url_section1': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(3, )),
+                        'fiber_admin_page_edit_url_section2': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(4, )),
+                        'fiber_admin_page_edit_url_sub1': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(5, )),
+                        'fiber_admin_page_edit_url_sub2': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(6, )),
                         }
                  ))
