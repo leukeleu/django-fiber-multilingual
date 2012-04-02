@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='django-fiber',
+    name='django-fiber-multilingual',
     version=__import__('fiber').__version__,
     license='Apache License, Version 2.0',
 
@@ -19,8 +19,8 @@ setup(
     author='Dennis Bunskoek',
     author_email='dbunskoek@leukeleu.nl',
 
-    url='https://github.com/ridethepony/django-fiber',
-    download_url='https://github.com/ridethepony/django-fiber/zipball/master',
+    url='https://github.com/leukeleu/django-fiber-multilingual',
+    download_url='https://github.com/leukeleu/django-fiber-multilingual/tarball/master',
 
     packages=find_packages(),
     include_package_data=True,
