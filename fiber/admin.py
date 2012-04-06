@@ -31,7 +31,8 @@ class ContentItemAdmin(MultilingualModelAdmin):
     form = forms.ContentItemAdminForm
     fieldsets = (
         (None, {'fields': ('name', get_editor_field_name('content_html'),)}),
-        (_('Advanced options'), {'classes': ('collapse',), 'fields': ('template_name', 'protected', 'metadata',)}),
+        (_('Advanced options'), {'classes': ('collapse',), 'fields': ('template_name', 'protected',)}),
+        (_('Metadata'), {'classes': ('collapse',), 'fields': ('metadata',)}),
     )
     date_hierarchy = 'updated'
     search_fields = ('name', get_editor_field_name('content_html'))
@@ -47,7 +48,8 @@ class PageAdmin(MultilingualModelAdmin):
     form = forms.PageForm
     fieldsets = (
         (None, {'fields': ('parent', 'title', 'url', 'redirect_page', 'template_name')}),
-        (_('Advanced options'), {'classes': ('collapse',), 'fields': ('mark_current_regexes', 'show_in_menu', 'is_public', 'protected', 'metadata',)}),
+        (_('Advanced options'), {'classes': ('collapse',), 'fields': ('mark_current_regexes', 'show_in_menu', 'is_public', 'protected',)}),
+        (_('Metadata'), {'classes': ('collapse',), 'fields': ('metadata',)}),
     )
 
     inlines = (PageContentItemInline,)
