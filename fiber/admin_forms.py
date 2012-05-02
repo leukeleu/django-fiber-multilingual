@@ -8,12 +8,16 @@ from multilingual.forms.forms import MultilingualModelForm
 from app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES
 from models import Page, ContentItem
 from utils.urls import is_quoted_url
+from fiber.editor import get_editor_field_name
 
 
 class ContentItemAdminForm(MultilingualModelForm):
 
     class Meta:
         model = ContentItem
+
+        # Hack for multilingual: redefine fields here
+        fields = ['name', get_editor_field_name('content_html'), 'template_name', 'protected', 'metadata']
 
     def __init__(self, *args, **kwargs):
         super(ContentItemAdminForm, self).__init__(*args, **kwargs)
