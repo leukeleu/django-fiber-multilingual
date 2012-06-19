@@ -136,7 +136,7 @@ class AdminPageMiddleware(object):
             return False
         if not hasattr(request, 'user'):
             return False
-        if not request.user.is_staff:
+        if not request.user.is_superuser:
             return False
         if response['Content-Type'].split(';')[0] not in ('text/html', 'application/xhtml+xml'):
             return False
