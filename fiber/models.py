@@ -28,6 +28,7 @@ class ContentItem(MultilingualModel):
     metadata = JSONField(_('metadata'), blank=True, null=True, schema=METADATA_CONTENT_SCHEMA, prefill_from='fiber.models.ContentItem')
     template_name = models.CharField(_('template name'), blank=True, max_length=70)
     used_on_pages_data = JSONField(_('used on pages'), blank=True, null=True)
+    must_translate = models.BooleanField(default=True)
 
     class Translation:
         content_markup = FiberMarkupField(verbose_name=_('Content'))
@@ -92,6 +93,7 @@ class Page(MultilingualModel):
     protected = models.BooleanField(_('protected'), default=False)
     content_items = models.ManyToManyField(ContentItem, through='PageContentItem', verbose_name=_('content items'))
     metadata = JSONField(blank=True, null=True, schema=METADATA_PAGE_SCHEMA, prefill_from='fiber.models.Page')
+    must_translate = models.BooleanField(default=True)
 
     class Translation:
         title = models.CharField(_('title'), blank=True, max_length=255)

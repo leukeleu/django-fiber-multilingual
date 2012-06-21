@@ -17,7 +17,7 @@ class ContentItemAdminForm(MultilingualModelForm):
         model = ContentItem
 
         # Hack for multilingual: redefine fields here
-        fields = ['name', get_editor_field_name('content_html'), 'template_name', 'protected', 'metadata']
+        fields = ['name', get_editor_field_name('content_html'), 'template_name', 'protected', 'metadata', 'must_translate']
 
     def __init__(self, *args, **kwargs):
         super(ContentItemAdminForm, self).__init__(*args, **kwargs)
