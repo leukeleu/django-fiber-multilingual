@@ -108,8 +108,7 @@ class FiberAdminContentItemAdmin(MultilingualModelAdmin):
             )
         else:
             self.fieldsets = (
-                (None, {'classes': ('hide-label',), 'fields': (get_editor_field_name('content_html'), )}),
-                (None, {'classes': ('select-box',), 'fields': ('template_name', )}),
+                (None, {'classes': ('hide-label',), 'fields': (get_editor_field_name('content_html'), 'template_name', )}),
             )
 
 
@@ -123,11 +122,13 @@ class FiberAdminPageAdmin(MultilingualModelAdmin):
         # remove template choices if there are no choices
         if len(TEMPLATE_CHOICES) == 0:
             self.fieldsets = (
-                (None, {'fields': ('title', 'url', 'redirect_page')}),
+                (None, {'fields': ('title', 'url', )}),
+                (_('Advanced options'), {'fields': ('redirect_page', 'show_in_menu', 'is_public', )}),
             )
         else:
             self.fieldsets = (
-                (None, {'fields': ('title', 'url', 'template_name', 'redirect_page')}),
+                (None, {'fields': ('title', 'url', )}),
+                (_('Advanced options'), {'fields': ('template_name', 'redirect_page', 'show_in_menu', 'is_public', )}),
             )
 
     def save_model(self, request, obj, form, change):

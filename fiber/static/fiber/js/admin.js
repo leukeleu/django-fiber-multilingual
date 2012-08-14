@@ -31,7 +31,6 @@ Fiber.enhance_content_template_select = function(select) {
 
 	hidden_template_name.val(template_name.val());
 	$(fieldset_of_template_name).append(hidden_template_name);
-	$(fieldset_of_template_name).hide();
 	$('.ui-dialog-buttonset').append(template_name);
 
 	template_name.change(function() {
@@ -74,7 +73,7 @@ Fiber.enhance_jsontextarea = function(textarea) {
 			current_json = {};
 		}
 		if ($(this).val()) {
-	   		current_json[$(this).parent('td').parent('tr').attr('key-data')] = $(this).val();
+			current_json[$(this).parent('td').parent('tr').attr('key-data')] = $(this).val();
 		} else {
 			delete current_json[$(this).parent('td').parent('tr').attr('key-data')];
 		}
@@ -206,6 +205,39 @@ var AdminDialog = Class.extend({
 		this.uiDialog.dialog('option', 'width', this.options.width);
 		this.uiDialog.dialog('option', 'height', this.options.height);
 		this.uiDialog.dialog('option', 'position', ['center', 40]);
+	},
+
+	advanced_fieldset_behaviour: function() {
+		var advancedFieldsets = this.admin_form.form.find('fieldset:not(fieldset:first-child)');
+		if (advancedFieldsets.length > 0) {
+
+			advancedFieldsets.each(function() {
+				var fieldset = $(this),
+					button   = $('<a>');
+
+				fieldset
+					.addClass('advanced-fieldset')
+					.hide();
+
+				button
+					.attr('href', '#')
+					.text(fieldset.find('h2').text())
+					.addClass('ui-dialog-buttonpane advanced-button closed')
+					.click(function(e) {
+						e.preventDefault();
+						$(this).toggleClass('closed')
+						fieldset.slideToggle('fast');
+					})
+					.insertBefore(fieldset);
+
+				$('<span>')
+					.text('»')
+					.addClass('toggler')
+					.prependTo(button);
+
+				fieldset.find('h2').remove();
+			});
+		}
 	},
 
 	cancel_click: function() {
@@ -466,6 +498,7 @@ var ChangeFormDialog = AdminFormDialog.extend({
 		});
 		this.admin_form.admin_form_load_success = $.proxy(function() {
 			this.append_form();
+			this.advanced_fieldset_behaviour();
 			this.redraw();
 		}, this);
 		this.admin_form.load();
@@ -577,6 +610,7 @@ var BaseFileSelectDialog = AdminRESTDialog.extend({
 		this._super();
 		// Create the upload button after displaying the dialog
 		this.create_upload_button();
+		this.create_delete_button();
 	},
 
 	get_upload_path: function() {
@@ -584,7 +618,16 @@ var BaseFileSelectDialog = AdminRESTDialog.extend({
 	},
 
 	refresh_grid: function() {
-		// override this
+		this.select_grid.simple_datagrid('reload');
+
+		// very crude way of disabling the delete button when the grid (and thus the selection) changes
+		var delete_button = $('#delete-buttonpane button');
+		delete_button.attr('disabled', 'disabled');
+		delete_button.addClass('ui-button-disabled ui-state-disabled');
+	},
+
+	get_upload_fieldname: function() {
+		return 'file';
 	},
 
 	create_upload_button: function() {
@@ -614,11 +657,13 @@ var BaseFileSelectDialog = AdminRESTDialog.extend({
 
 		// Valums file uploader
 		var uploader = new qq.FileUploaderBasic({
+			multipart: true,
+			fieldName: this.get_upload_fieldname(),
 			element: upload_button_pane[0],
 			button: upload_button_pane[0], // connecting directly to the jQUery UI upload_button doesn't work
 			action: this.get_upload_path(),
 			params: {
-				'sessionid': $.cookie('sessionid')
+				title: 'uploaded'
 			},
 			onComplete: $.proxy(function(id, fileName, responseJSON) {
 				this.refresh_grid();
@@ -628,9 +673,63 @@ var BaseFileSelectDialog = AdminRESTDialog.extend({
 
 		// reset button behavior
 		upload_button_pane.css({
-			'position': 'absolute',
+			'float': 'left',
 			'margin-top': 8,
 			'margin-bottom': 8
+		});
+	},
+
+	create_delete_button: function() {
+		var button_pane = this.uiDialog.parent().find('.ui-dialog-buttonpane');
+
+		var delete_button_pane = $('<div/>').prependTo(button_pane)
+			.attr({
+				'id': 'delete-buttonpane'
+			});
+
+		var delete_button = $('<button type="button">' + gettext('Delete') + '</button>')
+			.appendTo(delete_button_pane)
+			.attr({
+				'class': 'delete',
+				'id': 'delete-file-button'
+			})
+			.button({
+			})
+			.css({
+				'margin-top': 0,
+				'margin-bottom': 0,
+				'margin-right': 0
+			});
+
+		// reset button behavior
+		delete_button_pane.css({
+			'float': 'left',
+			'margin-top': 8,
+			'margin-bottom': 8
+		});
+
+		delete_button.addClass('ui-button-disabled ui-state-disabled');
+
+		this.select_grid.bind('datagrid.select', function() {
+			delete_button.attr('disabled', '');
+			delete_button.removeClass('ui-button-disabled ui-state-disabled');
+		});
+
+		var self = this;
+
+		delete_button.bind('click', function() {
+			var url = self.select_grid.simple_datagrid('getSelectedRow').url;
+
+			$.ajax({
+				url: url,
+				type: 'DELETE',
+				data: {},
+				statusCode: {
+					204: function() {
+						self.refresh_grid();
+					}
+				}
+			});
 		});
 	}
 });
@@ -639,12 +738,13 @@ var BaseFileSelectDialog = AdminRESTDialog.extend({
 Fiber.ImageSelectDialog = BaseFileSelectDialog.extend({
 
 	defaults: {
-		url: '/api/v1/images.jqgrid-json',
+		url: '/api/v2/images/',
 		width: 520,
 		height: 'auto',
 		start_width: 480,
 		start_height: 'auto'
 	},
+
 
 	// override default dialog window
 	init_dialog: function() {
@@ -668,78 +768,58 @@ Fiber.ImageSelectDialog = BaseFileSelectDialog.extend({
 	init_dialog_success: function(data) {
 
 		var action_button = this.uiDialog.parent().find('#action-button');
-		var filename = '';
+		var search = '';
+		var self = this;
 
-		this.image_select_grid = $(document.createElement('table')).attr('id', 'ui-image-select-grid'); // the id attribute is necessary for jqGrid
-		this.image_select_grid_pager = $(document.createElement('div')).attr('id', 'ui-image-select-grid-pager');
+		this.select_grid = $(document.createElement('table')).attr('id', 'ui-image-select-grid');
 		this.image_select_filter = $(document.createElement('div')).attr('id', 'ui-image-select-filter');
-		this.image_select_filter.append($(document.createElement('label')).attr({ id: 'ui-image-select-filter-label'}).text(gettext('Filter by filename')));
+		this.image_select_filter.append($(document.createElement('label')).attr({ id: 'ui-image-select-filter-label'}).text(gettext('Filter')));
 		this.image_select_filter.append($(document.createElement('input')).attr({ id: 'ui-image-select-filter-input', name: 'filter', value: '', type: 'text' }));
 		this.uiDialog.append(this.image_select_filter);
-		this.uiDialog.append(this.image_select_grid);
-		this.uiDialog.append(this.image_select_grid_pager);
+		this.uiDialog.append(this.select_grid);
 
-		$('#ui-image-select-filter-input').keyup(function() {
-			var new_filename = $('#ui-image-select-filter-input').val();
-			if (filename != new_filename) {
-				filename = new_filename;
-				$("#ui-image-select-grid").jqGrid('setGridParam',{ postData:{ filename: $('#ui-image-select-filter-input').val() }, search: true }).trigger("reloadGrid");
-			}
+		function thumbnail_formatter(value, row_data) {
+			// insert the url that ckeditor looks for. Use HTML5 data attribute instead?
+			return '<span style="display: none;">' + row_data.image_url + '</span>' + '<img src="' + row_data.image_url + '" title="' + row_data.title + '"/>';
+		}
+
+		this.select_grid.simple_datagrid({
+			columns: [
+				{title: gettext('Image'), key: 'image', on_generate: thumbnail_formatter},
+				{title: gettext('Filename'), key: 'filename'},
+				{title: gettext('Size'), key: 'size'},
+				{title: gettext('Updated'), key: 'updated'}
+			],
+			url: this.options.url,
+			order_by: 'filename'
 		});
 
-		var thumbnail_formatter = function(cellvalue, options, rowObject) {
-			return '<img src="' + cellvalue + '" title="' + rowObject[2] + '" />';
-		};
+		this.select_grid.bind('datagrid.select', function() {
+			action_button.attr('disabled', '');
+			action_button.removeClass('ui-button-disabled ui-state-disabled');
+		});
 
-		this.image_select_grid.jqGrid({
-			url: this.options.url,
-			datatype: 'json',
-			colNames: ['url', gettext('Image'), gettext('Filename'), gettext('Size'), gettext('Updated')],
-			colModel: [
-				{ name: 'url', index: 'url', hidden: true },
-				{ name: 'image', index: 'image', width: 120, resizable: false, sortable: false, formatter: thumbnail_formatter },
-				{ name: 'filename', index: 'filename', width: 160, resizable: false },
-				{ name: 'size', index: 'size', width: 80, resizable: false },
-				{ name: 'updated', index: 'updated', width: 160, resizable: false }
-			],
-			rowNum: 50,
-			pager: '#ui-image-select-grid-pager',
-			shrinkToFit: false,
-			width: 520,
-			height: 300,
-			sortname: 'updated',
-			sortorder: 'desc',
-			onSelectRow: function(id) {
-				action_button.attr('disabled', '');
-				action_button.removeClass('ui-button-disabled ui-state-disabled');
-			},
-			gridComplete: function() {
-				var num_pages = $("#ui-image-select-grid").getGridParam('lastpage');
-				if (num_pages > 1) {
-					$('#ui-image-select-grid-pager').show();
-				} else {
-					$("#ui-image-select-grid-pager").hide();
-				}
+		$('#ui-image-select-filter-input').keyup(function() {
+			var new_search = $('#ui-image-select-filter-input').val();
+			if (search != new_search) {
+				search = new_search;
+				self.select_grid.simple_datagrid('setParameter', 'search', search);
+				self.select_grid.simple_datagrid('setCurrentPage', 1);
+				self.refresh_grid();
 			}
 		});
 	},
 
 	get_upload_path: function() {
-		return '/api/v1/images/';
+		return '/api/v2/images/';
 	},
 
-	refresh_grid: function() {
-		this.image_select_grid.trigger('reloadGrid');
+	get_selected_row: function() {
+		return this.select_grid.simple_datagrid('getSelectedRow');
 	},
 
-	close: function() {
-		this.image_select_grid.GridDestroy();
-		this._super();
-	},
-
-	destroy: function() {
-		this.image_select_grid.GridDestroy();
-		this._super();
+	get_upload_fieldname: function() {
+		return 'image';
 	}
 });
 
@@ -747,7 +827,7 @@ Fiber.ImageSelectDialog = BaseFileSelectDialog.extend({
 Fiber.FileSelectDialog = BaseFileSelectDialog.extend({
 
 	defaults: {
-		url: '/api/v1/files.jqgrid-json',
+		url: '/api/v2/files/',
 		width: 520,
 		height: 'auto',
 		start_width: 480,
@@ -775,62 +855,42 @@ Fiber.FileSelectDialog = BaseFileSelectDialog.extend({
 
 	init_dialog_success: function(data) {
 		var action_button = this.uiDialog.parent().find('#action-button');
-		var filename = '';
+		var search = '';
+		var self = this;
 
-		this.file_select_grid = $(document.createElement('table')).attr('id', 'ui-file-select-grid'); // the id attribute is necessary for jqGrid
-		this.file_select_grid_pager = $(document.createElement('div')).attr('id', 'ui-file-select-grid-pager');
+		this.select_grid = $(document.createElement('table')).attr('id', 'ui-file-select-grid');
 		this.file_select_filter = $(document.createElement('div')).attr('id', 'ui-file-select-filter');
-		this.file_select_filter.append($(document.createElement('label')).attr({ id: 'ui-file-select-filter-label'}).text(gettext('Filter by filename')));
+		this.file_select_filter.append($(document.createElement('label')).attr({ id: 'ui-file-select-filter-label'}).text(gettext('Filter')));
 		this.file_select_filter.append($(document.createElement('input')).attr({ id: 'ui-file-select-filter-input', name: 'filter', value: '', type: 'text' }));
 		this.uiDialog.append(this.file_select_filter);
-		this.uiDialog.append(this.file_select_grid);
-		this.uiDialog.append(this.file_select_grid_pager);
+		this.uiDialog.append(this.select_grid);
+
+		this.select_grid.simple_datagrid({
+			columns: [
+				{title: gettext('Filename'), key: 'filename'},
+				{title: gettext('Updated'), key: 'updated'}
+			],
+			url: this.options.url,
+			order_by: 'filename'
+		});
+		this.select_grid.bind('datagrid.select', function() {
+			action_button.attr('disabled', '');
+			action_button.removeClass('ui-button-disabled ui-state-disabled');
+		});
 
 		$('#ui-file-select-filter-input').keyup(function() {
-			var new_filename = $('#ui-file-select-filter-input').val();
-			if (filename != new_filename) {
-				filename = new_filename;
-				$("#ui-file-select-grid").jqGrid('setGridParam',{ postData:{ filename: $('#ui-file-select-filter-input').val() }, search: true }).trigger('reloadGrid');
-			}
-		});
-		this.file_select_grid.jqGrid({
-			url: this.options.url,
-			datatype: 'json',
-			data: { 'filename': 'praxis'},
-			colNames: ['url', gettext('Filename'), gettext('Updated')],
-			colModel: [
-				{ name: 'url', index: 'url', hidden: true },
-				{ name: 'filename', index: 'filename', width: 360, resizable: false },
-				{ name: 'updated', index: 'updated', width: 160, resizable: false }
-			],
-			rowNum: 50,
-			pager: '#ui-file-select-grid-pager',
-			shrinkToFit: false,
-			width: 520,
-			height: 300,
-			sortname: 'updated',
-			sortorder: 'desc',
-			onSelectRow: function(id) {
-				action_button.attr('disabled', '');
-				action_button.removeClass('ui-button-disabled ui-state-disabled');
-			},
-			gridComplete: function() {
-				var num_pages = $("#ui-file-select-grid").getGridParam('lastpage');
-				if (num_pages > 1) {
-					$('#ui-file-select-grid-pager').show();
-				} else {
-					$("#ui-file-select-grid-pager").hide();
-				}
+			var new_search = $('#ui-file-select-filter-input').val();
+			if (search != new_search) {
+				search = new_search;
+				self.select_grid.simple_datagrid('setParameter', 'search', search);
+				self.select_grid.simple_datagrid('setCurrentPage', 1);
+				self.refresh_grid();
 			}
 		});
 	},
 
 	get_upload_path: function() {
-		return '/api/v1/files/';
-	},
-
-	refresh_grid: function() {
-		this.file_select_grid.trigger('reloadGrid');
+		return '/api/v2/files/';
 	},
 
 	action_click: function() {
@@ -841,14 +901,8 @@ Fiber.FileSelectDialog = BaseFileSelectDialog.extend({
 		this.destroy();
 	},
 
-	close: function() {
-		this.file_select_grid.GridDestroy();
-		this._super();
-	},
-
-	destroy: function() {
-		this.file_select_grid.GridDestroy();
-		this._super();
+	get_selected_row: function() {
+		return this.select_grid.simple_datagrid('getSelectedRow');
 	}
 });
 
@@ -856,7 +910,7 @@ Fiber.FileSelectDialog = BaseFileSelectDialog.extend({
 Fiber.PageSelectDialog = AdminRESTDialog.extend({
 
 	defaults: {
-		url: '/api/v1/pages.json',
+		url: '/api/v2/pages/',
 		width: 480,
 		height: 320,
 		start_width: 480,
@@ -922,7 +976,8 @@ Fiber.PageSelectDialog = AdminRESTDialog.extend({
 		}
 
 		$.ajax({
-			url: '/admin/fiber/pages.json',
+			url: '/api/v2/pagetree/',
+			type: 'GET',
 			success: $.proxy(handle_load_data, this),
 			cache: false,
 			dataType: 'json'
@@ -1083,6 +1138,21 @@ var AddButton = Class.extend({ // TODO: subclass to AddPageButton / AddContentIt
 });
 
 
+Fiber.move_page_content_item = function(page_content_item_url, before_page_content_item_id, block_name) {
+	$.ajax({
+		url: page_content_item_url,
+		type: 'POST',
+		dataType: 'json',
+
+		data: {
+			before_page_content_item_id: before_page_content_item_id,
+			block_name: block_name,
+			_method: 'PUT',
+		},
+		success: reloadPage
+	});
+};
+
 var DroppableArea = Class.extend({
 
 	// default options
@@ -1133,23 +1203,22 @@ var DroppableArea = Class.extend({
 
 	add_content_item: function(content_item_id) { // TODO: move to utils? (DRY)
 		// perform an AJAX call to add the added object to the current page,
-		// optionally placed before the beforePageContentItem
+		// placed before the beforeElement
 		var data = {
-			content_item_id: content_item_id,
-			page_id: this.options.page_id,
-			block_name: this.options.block_name,
-			before_page_content_item_id: this.fiber_item.element_data.page_content_item_id
+			content_item: content_item_id,
+			page: this.options.page_id,
+			block_name: this.options.block_name
 		};
 
+		var before_page_content_item_id = this.fiber_item.element_data.page_content_item_id
 		busyIndicator.show();
 
 		$.ajax({
-			url: '/api/v1/page_content_items/',
+			url: '/api/v2/page_content_items/',
 			type: 'POST',
 			data: data,
-			success: function(data) {
-				// when successful, reload the page
-				reloadPage();
+			success: function(response) {
+				Fiber.move_page_content_item(response.move_url, before_page_content_item_id, response.block_name);
 			}
 		});
 	},
@@ -1157,18 +1226,11 @@ var DroppableArea = Class.extend({
 	move_content_item: function(fiber_item_data) {
 		busyIndicator.show();
 
-		$.ajax({
-			url: '/api/v1/page_content_item/' + fiber_item_data.page_content_item_id + '/',
-			type: 'PUT',
-			data: {
-				before_page_content_item_id: this.fiber_item.element_data.page_content_item_id,
-				action: 'move',
-				block_name: this.fiber_item.element_data.block_name
-			},
-			success: function() {
-				reloadPage();
-			}
-		});
+		Fiber.move_page_content_item(
+			'/api/v2/page_content_items/' + fiber_item_data.page_content_item_id + '/move/',
+			this.fiber_item.element_data.page_content_item_id,
+			this.fiber_item.element_data.block_name
+		)
 	},
 
 	set_position: function() {
@@ -1218,24 +1280,19 @@ var AddContentItemFormDialog = ChangeContentItemFormDialog.extend({
 		// perform an AJAX call to add the added object to the current page,
 		// placed before the beforeElement
 		var data = {
-			content_item_id: content_item_id,
-			page_id: this.options.page_id,
+			content_item: content_item_id,
+			page: this.options.page_id,
 			block_name: this.options.block_name
 		};
-
-		if (this.options.before_page_content_item_id) {
-			data.before_page_content_item_id = this.options.before_page_content_item_id;
-		}
-
+		var before_page_content_item_id = this.options.before_page_content_item_id
 		busyIndicator.show();
 
 		$.ajax({
-			url: '/api/v1/page_content_items/',
+			url: '/api/v2/page_content_items/',
 			type: 'POST',
 			data: data,
-			success: function(data) {
-				// when successful, reload the page
-				reloadPage();
+			success: function(response) {
+				Fiber.move_page_content_item(response.move_url, before_page_content_item_id, response.block_name);
 			}
 		});
 	}
@@ -1247,7 +1304,7 @@ var adminPage = {
 
 	create_fiber_item: function($fiber_element) {
 		// create new FiberItem
-		var fiber_item = new FiberItem($fiber_element);
+		var fiber_item = new Fiber.FiberItem($fiber_element);
 		this.all_fiber_items.push(fiber_item);
 
 		// find closest parent, and see if it is already a FiberItem
@@ -1281,8 +1338,6 @@ var adminPage = {
 	},
 
 	init_admin_elements: function() {
-		var fiber_elements = this.get_fiber_elements();
-
 		// create nested structure of Fiber items
 		$.each(this.get_fiber_elements(), $.proxy(function(i, fiber_element) {
 			this.create_fiber_item($(fiber_element));
@@ -1328,17 +1383,19 @@ var adminPage = {
 			}
 		}
 
-		function handleMoveNode(moved_node, target_node, position) {
+		function handleMoveNode(event) {
 			busyIndicator.show();
 
+			var info = event.move_info;
 			$.ajax({
-				url: '/api/v1/page/' + moved_node.id + '/',
-				type: 'PUT',
+				url: '/api/v2/pages/' + info.moved_node.id + '/move_page/',
+				type: 'POST',
 				dataType: 'json',
+
 				data: {
-					action: 'move',
-					target_node_id: target_node.id,
-					position: position
+					target_node_id: info.target_node.id,
+					position: info.position,
+					_method: 'PUT',
 				},
 				success: function(data) {
 					reloadPage();
@@ -1366,16 +1423,18 @@ var adminPage = {
 			}
 		}
 
-		function canMove(moved_node, target_node, position) {
-			if (!moved_node.url) {
+		function canMove(node) {
+			if (node.url) {
+				return true;
+			}
+			else {
 				// cannot move menu
 				return false;
 			}
+		}
 
-			if (!target_node) {
-				return true;
-			}
-			else if (!target_node.url) {
+		function canMoveTo(moved_node, target_node, position) {
+			if (!target_node.url) {
 				// can move inside menu, not before or after
 				return (position == 'inside');
 			}
@@ -1390,13 +1449,14 @@ var adminPage = {
 			autoOpen: 0,
 			saveState: 'fiber_pages',
 			dragAndDrop: true,
-			onMoveNode: handleMoveNode,
 			selectable: true,
 			onCreateLi: $.proxy(createLi, this),
-			onCanMove: $.proxy(canMove, this)
+			onCanMove: $.proxy(canMove, this),
+			onCanMoveTo: $.proxy(canMoveTo, this)
 		});
 		this.admin_page_tree.bind('tree.click', handleClick);
 		this.admin_page_tree.bind('tree.contextmenu', $.proxy(this.handle_page_menu_context_menu, this));
+		this.admin_page_tree.bind('tree.move', handleMoveNode);
 
 		// disable textual selection of tree elements
 		$('.sidebar-tree').disableSelection();
@@ -1495,7 +1555,7 @@ var adminPage = {
 									busyIndicator.show();
 
 									$.ajax({
-										url: '/api/v1/page/' + node.id + '/',
+										url: '/api/v2/pages/' + node.id + '/',
 										type: 'DELETE',
 										data: {},
 										success: function(data) {
@@ -1564,7 +1624,7 @@ var adminPage = {
 
 		contextmenu.append(
 			$('<li><a href="#">'+gettext('Delete')+'</a></li>').click(function() {
-				var confirmationDialog = $('<div></div>').dialog({
+				var confirmation_dialog = $('<div class="dialog"></div>').dialog({
 					modal: true,
 					resizable: false,
 					width: 400,
@@ -1578,7 +1638,7 @@ var adminPage = {
 								busyIndicator.show();
 
 								$.ajax({
-									url: '/api/v1/content_item/' + node.id + '/',
+									url: '/api/v2/content_items/' + node.id + '/',
 									type: 'DELETE',
 									data: {},
 									success: function(data) {
@@ -1595,11 +1655,11 @@ var adminPage = {
 						}
 					}
 				});
-				confirmationDialog.dialog('option', 'title', gettext('Are you sure?'));
-				confirmationDialog.html(gettext('<p>Are you sure you want to delete this item?</p>'));
+				confirmation_dialog.dialog('option', 'title', gettext('Are you sure?'));
+				confirmation_dialog.html(gettext('<p>Are you sure you want to delete this item?</p>'));
 			})
 		);
-		if (node.used_on_pages.length >= 1) {
+		if (node.used_on_pages && node.used_on_pages.length >= 1) {
 			var context_submenu_used_on_pages = $('<ul class="ui-context-menu"></ul>');
 
 			$(node.used_on_pages).each(function(index) {
@@ -1624,7 +1684,6 @@ var adminPage = {
 		var animation_duration = 200;
 
 		var wpr_admin_sidebar = this.wpr_admin_sidebar;
-		var toggle_button = this.toggle_button;
 
 		// define animation values
 		var animate_sidebar_left_to = wpr_admin_sidebar.hidden ? 0 : (10 - 240);
@@ -1650,8 +1709,7 @@ var adminPage = {
 
 		$('#wpr-body').animate(
 			{
-				left: animate_body_left_to,
-				marginRight: animate_body_left_to
+				marginLeft: animate_body_left_to
 			},
 			animation_duration
 		);
@@ -1788,10 +1846,10 @@ function reloadPage(params) {
 		busyIndicator.show();
 
 		$.ajax({
-			url: '/api/v1/page/' + page_id + '/',
+			url: '/api/v2/pages/' + page_id + '/',
 			type: 'GET',
 			success: function(data) {
-				window.location.replace(data.href);
+				window.location.replace(data.url);
 			},
 			error: function() {
 				if (params && params.error) {
@@ -1804,7 +1862,7 @@ function reloadPage(params) {
 
 
 // TODO: subclass for specific uses (add / change) and types (page / content / other)
-var FiberItem = Class.extend({
+Fiber.FiberItem = Class.extend({
 	// TODO: add defaults?
 
 	init: function($element) {
@@ -1939,7 +1997,7 @@ var FiberItem = Class.extend({
 	create_button: function() {
 		// TODO: split this into subclasses
 		if (this.element_data.type == 'page') {
-			params = {
+			var params = {
 				before_page_id: this.element_data.id
 			};
 
@@ -1951,7 +2009,7 @@ var FiberItem = Class.extend({
 				this.element_data.block_name &&
 				this.element_data.page_id
 			) {
-				params = {
+				var params = {
 					before_page_content_item_id: this.element_data.page_content_item_id
 				};
 
@@ -1963,7 +2021,7 @@ var FiberItem = Class.extend({
 	},
 
 	button_position: function() {
-		position_params = {
+		var position_params = {
 			my: 'center center',
 			at: 'left top',
 			of: this.$element
@@ -2024,7 +2082,7 @@ var FiberItem = Class.extend({
 	},
 
 	droppable_position: function() {
-		position_params = {
+		var position_params = {
 			my: 'left top',
 			at: 'left top',
 			of: this.$element,
@@ -2139,7 +2197,7 @@ var FiberItem = Class.extend({
 		adminPage.hide_admin_elements();
 
 		$.ajax({
-			url: '/api/v1/page_content_item/' + this.element_data.page_content_item_id + '/',
+			url: '/api/v2/page_content_items/' + this.element_data.page_content_item_id + '/',
 			type: 'DELETE',
 			data: {},
 			success: function(data) {
@@ -2177,7 +2235,7 @@ $(window).ready(function() {
 
 	if (body_fiber_data.show_login) {
 		$('body').addClass('df-admin');
-		loginform = new LoginFormDialog();
+		new LoginFormDialog();
 	}
 });
 

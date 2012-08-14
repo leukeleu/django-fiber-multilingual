@@ -1,12 +1,12 @@
-========================================
-Installation instructions for Django 1.3
-========================================
+===============================================
+Installation instructions for Django 1.3 or 1.4
+===============================================
 
 
 Installation:
 =============
 
-We're assuming you are using Django 1.3. If you need to install Django Fiber with an older Django version, you can find instructions in the docs folder.
+We're assuming you are using Django 1.3 or 1.4. If you need to install Django Fiber with an older Django version, you can find instructions in the docs folder.
 
 ::
 
@@ -20,8 +20,8 @@ These dependencies are automatically installed:
 
 ::
 
-	PIL>=1.1.7
-	django-piston==0.2.3rc1
+	Pillow==1.7.7
+    djangorestframework==0.3.3
 	django-mptt>=0.4.2
 	django-compressor>=0.7.1
 
@@ -50,7 +50,7 @@ settings.py
 	INSTALLED_APPS = (
 	    ...
 	    'django.contrib.staticfiles',
-	    'piston',
+	    'djangorestframework',
 	    'mptt',
 	    'compressor',
 	    'fiber',
@@ -75,7 +75,7 @@ urls.py
 
 	urlpatterns = patterns('',
 	    ...
-	    (r'^api/v1/', include('fiber.api.urls')),
+	    (r'^api/v2/', include('fiber.rest_api.urls')),
 	    (r'^admin/fiber/', include('fiber.admin_urls')),
 	    (r'^jsi18n/$', 'django.views.i18n.javascript_catalog', {'packages': ('fiber',),}),
 	    ...

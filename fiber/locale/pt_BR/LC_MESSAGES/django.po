@@ -1,0 +1,294 @@
+# English base text for Django Fiber
+# Copyright (C) 2011 Ride The Pony
+# This file is distributed under the same license as the Django Fiber package.
+#
+# Translators:
+# Fábio  <bnafta@gmail.com>, 2011.
+# Guilherme Gondim <semente+transifex@taurinus.org>, 2012.
+msgid ""
+msgstr ""
+"Project-Id-Version: django-fiber\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-06-27 01:02+0200\n"
+"PO-Revision-Date: 2012-06-27 01:08+0100\n"
+"Last-Translator: Dennis Bunskoek <dbunskoek@leukeleu.nl>\n"
+"Language-Team: Portuguese (Brazil) (http://www.transifex.com/projects/p/django-fiber/language/pt_BR/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1)\n"
+"X-Poedit-Language: English\n"
+
+#: admin.py:32
+#: admin.py:49
+#: admin.py:125
+#: admin.py:130
+msgid "Advanced options"
+msgstr "Opções avançadas"
+
+#: admin.py:33
+#: admin.py:50
+msgid "Metadata"
+msgstr ""
+
+#: admin.py:64
+msgid "View on site"
+msgstr "Veja no site"
+
+#: admin.py:76
+msgid "Move up"
+msgstr "Mover para cima"
+
+#: admin.py:81
+msgid "Move down"
+msgstr "Mover para baixo"
+
+#: admin.py:87
+msgid "Add sub page"
+msgstr "Adicionar uma sub-página"
+
+#: admin.py:91
+msgid "Actions"
+msgstr "Ações"
+
+#: admin_forms.py:19
+msgid "Content template"
+msgstr ""
+
+#: admin_forms.py:25
+msgid "Redirect page"
+msgstr "Página de redirecionamento"
+
+#: admin_forms.py:33
+msgid "Template"
+msgstr "Modelo"
+
+#: admin_forms.py:45
+msgid "A named url can't be combined with a redirect page"
+msgstr "Uma url nomeada não pode ser combinada com uma página de redirecionamento"
+
+#: admin_views.py:25
+msgid "This account is inactive."
+msgstr "Esta conta está inativa."
+
+#: admin_views.py:30
+msgid "Please enter a correct username and password. Note that both fields are case-sensitive."
+msgstr "Por favor, insira um nome de usuário e senha corretos. Note que ambos campos são sensíveis a maiúsculas e minúsculas."
+
+#: managers.py:64
+msgid "used more than once"
+msgstr "utilizado mais de uma vez"
+
+#: managers.py:65
+msgid "unused"
+msgstr "não utilizado"
+
+#: managers.py:66
+msgid "used once"
+msgstr "utilizado uma vez"
+
+#: managers.py:67
+msgid "recently changed"
+msgstr "alterado recentemente"
+
+#: models.py:23
+#: models.py:75
+#: models.py:281
+#: models.py:311
+msgid "created"
+msgstr "criado"
+
+#: models.py:24
+#: models.py:76
+#: models.py:282
+#: models.py:312
+msgid "updated"
+msgstr "atualizado"
+
+#: models.py:25
+msgid "name"
+msgstr "nome"
+
+#: models.py:26
+#: models.py:27
+#: templates/fiber/admin.html:21
+msgid "Content"
+msgstr "Conteúdo"
+
+#: models.py:28
+#: models.py:87
+msgid "protected"
+msgstr "protegido"
+
+#: models.py:29
+msgid "metadata"
+msgstr "metadados"
+
+#: models.py:30
+#: models.py:84
+msgid "template name"
+msgstr "nome do modelo"
+
+#: models.py:31
+msgid "used on pages"
+msgstr ""
+
+#: models.py:36
+#: models.py:234
+msgid "content item"
+msgstr "item de conteúdo"
+
+#: models.py:37
+#: models.py:88
+msgid "content items"
+msgstr "itens de conteúdo"
+
+#: models.py:46
+msgid "[ EMPTY ]"
+msgstr "[ VAZIO ]"
+
+#: models.py:77
+msgid "parent"
+msgstr "parent"
+
+#: models.py:79
+#: models.py:284
+#: models.py:314
+msgid "title"
+msgstr "título"
+
+#: models.py:81
+msgid "redirect page"
+msgstr "página de redirecionamento"
+
+#: models.py:82
+msgid "mark current regexes"
+msgstr "marcar regexes atuais"
+
+#: models.py:85
+msgid "show in menu"
+msgstr "mostrar no menu"
+
+#: models.py:86
+msgid "is public"
+msgstr ""
+
+#: models.py:95
+#: models.py:235
+msgid "page"
+msgstr "página"
+
+#: models.py:96
+msgid "pages"
+msgstr "páginas"
+
+#: models.py:236
+msgid "block name"
+msgstr "nome do bloco"
+
+#: models.py:237
+msgid "sort"
+msgstr "organizar"
+
+#: models.py:283
+#: models.py:289
+msgid "image"
+msgstr "imagem"
+
+#: models.py:285
+msgid "width"
+msgstr "largura"
+
+#: models.py:286
+msgid "height"
+msgstr "altura"
+
+#: models.py:290
+msgid "images"
+msgstr "imagens"
+
+#: models.py:313
+#: models.py:317
+msgid "file"
+msgstr "arquivo"
+
+#: models.py:318
+msgid "files"
+msgstr "arquivos"
+
+#: templates/fiber/admin.html:9
+msgid "Log out"
+msgstr "Sair"
+
+#: templates/fiber/admin.html:10
+msgid "Backend"
+msgstr "Backend"
+
+#: templates/fiber/admin.html:13
+msgid "Pages"
+msgstr "Páginas"
+
+#: utils/date.py:34
+msgid "just now"
+msgstr "agora mesmo"
+
+#: utils/date.py:36
+#, python-format
+msgid "%s seconds ago"
+msgstr "%s segundos atrás"
+
+#: utils/date.py:40
+#, python-format
+msgid "%s minutes ago"
+msgstr "%s minutos atrás"
+
+#: utils/date.py:42
+msgid "an hour ago"
+msgstr "uma hora atrás"
+
+#: utils/date.py:44
+#, python-format
+msgid "%s hours ago"
+msgstr "%s horas atrás"
+
+#: utils/date.py:46
+msgid "yesterday"
+msgstr "ontem"
+
+#: utils/date.py:48
+#, python-format
+msgid "%s days ago"
+msgstr "%s dias atrás"
+
+#: utils/date.py:50
+msgid "a week ago"
+msgstr "há uma semana atrás"
+
+#: utils/date.py:52
+#, python-format
+msgid "%s weeks ago"
+msgstr "%s semanas atrás"
+
+#: utils/date.py:54
+#, python-format
+msgid "%s months ago"
+msgstr "%s meses atrás"
+
+#: utils/date.py:55
+#, python-format
+msgid "%s years ago"
+msgstr "%s anos atrás"
+
+#: utils/fields.py:13
+msgid "URL"
+msgstr "URL"
+
+#: utils/form_fields.py:10
+msgid "Example: 'products' or '/section-1/products/' or '\"some_named_url\"'"
+msgstr "Example: 'products' or '/section-1/products/' or '\"some_named_url\"'"
+
+#: utils/validators.py:27
+msgid "No reverse match found for the named url"
+msgstr "No reverse match found for the named url"
+

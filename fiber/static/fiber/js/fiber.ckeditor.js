@@ -39,7 +39,7 @@ Fiber.enhance_textarea = function(textarea, auto_height) {
 
 Fiber.remove_textarea = function(textarea) {
 	if (textarea.id in CKEDITOR.instances) {
-		CKEDITOR.remove(CKEDITOR.instances[textarea.id]);
+		CKEDITOR.instances[textarea.id].destroy(false);
 	}
 };
 
@@ -95,7 +95,8 @@ function extend_CKEditor() {
 			var file_select_dialog = new Fiber.FileSelectDialog();
 
 			file_select_dialog.action_click = function() {
-				var selected_file_path = $(this.uiDialog.find('tr.ui-state-highlight td')[0]).text();
+				var row = file_select_dialog.get_selected_row();
+				var selected_file_path = row.file_url;
 
 				// delete any existing links on the selected text
 				editor.document.$.execCommand('unlink', false, null);
@@ -138,7 +139,8 @@ function extend_CKEditor() {
 			var image_select_dialog = new Fiber.ImageSelectDialog();
 
 			image_select_dialog.action_click = function() {
-				var selected_image_path = $(this.uiDialog.find('tr.ui-state-highlight td')[0]).text();
+				var row = image_select_dialog.get_selected_row();
+				var selected_image_path = row.image_url;
 
 				// delete any existing links on the selected text
 				editor.document.$.execCommand('unlink', false, null);
@@ -239,7 +241,8 @@ function extend_CKEditor() {
 			var image_select_dialog = new Fiber.ImageSelectDialog();
 
 			image_select_dialog.action_click = function() {
-				var selected_image_path = $(this.uiDialog.find('tr.ui-state-highlight td')[0]).text();
+				var selected_image_path = $(this.uiDialog.find('tr.selected td'));
+				selected_image_path =$(selected_image_path[0]).text();
 				var selected_image_title = '';
 
 				// create image element, and insert it
