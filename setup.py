@@ -7,11 +7,11 @@ setup(
 
     install_requires=[
         'PIL>=1.1.7',
-        'django-piston==0.2.3rc1',
+        'django-piston==0.2.3',
         'django-mptt==0.5.2',
         'django-compressor>=0.7.1',
     ],
-    dependency_links=['http://bitbucket.org/brodie/django-piston/get/c4e6eb8f7eb5.tar.gz#egg=django-piston-0.2.3rc1'],
+    dependency_links=['https://bitbucket.org/jespern/django-piston/get/7c90898072ce.tar.gz#egg=django-piston-0.2.3'],
 
     description='Django Fiber - a simple, user-friendly CMS for all your Django projects',
     long_description=open('README.rst').read(),
