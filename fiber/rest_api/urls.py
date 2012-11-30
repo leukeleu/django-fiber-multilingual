@@ -5,7 +5,7 @@ http://django-rest-framework.readthedocs.org/.
 
 import os
 
-from django.conf.urls.defaults import patterns, url
+from django.conf.urls import patterns, url
 from django.core.urlresolvers import reverse
 
 from djangorestframework.resources import ModelResource
