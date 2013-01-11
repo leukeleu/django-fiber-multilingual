@@ -4,6 +4,8 @@ from django.contrib.admin.util import model_ngettext
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
 
+from multilingual.admin.options import MultilingualModelAdmin
+
 from . import admin_forms as forms
 from . import fiber_admin
 from .app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES, PERMISSION_CLASS
@@ -46,7 +48,7 @@ class UserPermissionMixin(object):
         perms.object_created(request.user, obj)
 
 
-class FileAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
+class FileAdmin(UserPermissionMixin, MultilingualModelAdmin):
     list_display = ('__unicode__', 'title', )
     date_hierarchy = 'updated'
     search_fields = ('title', )
@@ -77,7 +79,7 @@ class ImageAdmin(FileAdmin):
     pass
 
 
-class ContentItemAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
+class ContentItemAdmin(UserPermissionMixin, MultilingualModelAdmin):
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
     fieldsets = (
@@ -145,7 +147,7 @@ class PageAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
     action_links.allow_tags = True
 
 
-class FiberAdminContentItemAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
+class FiberAdminContentItemAdmin(UserPermissionMixin, MultilingualModelAdmin):
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
 
@@ -163,7 +165,7 @@ class FiberAdminContentItemAdmin(UserPermissionMixin, fiber_admin.MultilingualMo
             )
 
 
-class FiberAdminPageAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
+class FiberAdminPageAdmin(UserPermissionMixin, MultilingualModelAdmin):
 
     form = forms.PageForm
 
