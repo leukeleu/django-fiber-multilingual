@@ -96,7 +96,7 @@ class PageContentItemInline(UserPermissionMixin, admin.TabularInline):
     extra = 1
 
 
-class PageAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
+class PageAdmin(UserPermissionMixin, MultilingualModelAdmin):
 
     form = forms.PageForm
     fieldsets = (
