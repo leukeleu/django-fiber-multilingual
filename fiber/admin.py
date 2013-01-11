@@ -1,32 +1,83 @@
-from django.contrib import admin
 from django.conf import settings
+from django.contrib import admin
+from django.contrib.admin.util import model_ngettext
 from django.utils.translation import ugettext_lazy as _
+from django.core.exceptions import PermissionDenied
 
-from mptt.admin import MPTTModelAdmin
+from . import admin_forms as forms
+from . import fiber_admin
+from .app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES, PERMISSION_CLASS
+from .editor import get_editor_field_name
+from .models import Page, ContentItem, PageContentItem, Image, File
+from .utils.class_loader import load_class
 
-from multilingual.admin.options import MultilingualModelAdmin
-
-from fiber.editor import get_editor_field_name
-from app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES
-from models import Page, ContentItem, PageContentItem, Image, File
-import admin_forms as forms
-
-import fiber_admin
+perms = load_class(PERMISSION_CLASS)
 
 
-class FileAdmin(admin.ModelAdmin):
-    list_display = ('title', '__unicode__')
+class UserPermissionMixin(object):
+
+    def has_change_permission(self, request, obj=None):
+        """
+        Overrides Django's ModelAdmin method.
+        """
+        if obj:  # obj can be None for list views
+            return perms.can_edit(request.user, obj)
+        return super(UserPermissionMixin, self).has_change_permission(request)
+
+    def has_delete_permission(self, request, obj=None):
+        """
+        Override Django's ModelAdmin method.
+        Handles both instance-delete and bulk-delete views.
+        """
+        if obj:  # instance-delete action
+            return perms.can_edit(request.user, obj)
+        pks = request.POST.getlist('_selected_action')  # bulk delete action
+        qs = self.model.objects.filter(pk__in=pks)
+        editables_qs = perms.filter_objects(request.user, self.model.objects.all())
+        if len(set(qs) & set(editables_qs)) != len(qs):
+            return False
+        return True
+
+    def save_model(self, request, obj, form, change):
+        """
+        Notifies the PERMISSION_CLASS that an `obj` was created by `user`.
+        """
+        super(UserPermissionMixin, self).save_model(request, obj, form, change)
+        perms.object_created(request.user, obj)
+
+
+class FileAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
+    list_display = ('__unicode__', 'title', )
     date_hierarchy = 'updated'
     search_fields = ('title', )
+    actions = ['really_delete_selected']
+
+    def get_actions(self, request):
+        actions = super(FileAdmin, self).get_actions(request)
+        del actions['delete_selected']  # the original delete selected action doesn't remove associated files, because .delete() is never called
+        return actions
+
+    def really_delete_selected(self, request, queryset):
+        # Check that the user has delete permission for the actual model
+        if not self.has_delete_permission(request):
+            raise PermissionDenied
+
+        for obj in queryset:
+            obj.delete()
+
+        n = queryset.count()
+        self.message_user(request, _("Successfully deleted %(count)d %(items)s.") % {
+            "count": n, "items": model_ngettext(self.opts, n)
+        })
+
+    really_delete_selected.short_description = _('Delete selected files')
 
 
-class ImageAdmin(admin.ModelAdmin):
-    list_display = ('title', '__unicode__')
-    date_hierarchy = 'updated'
-    search_fields = ('title', )
+class ImageAdmin(FileAdmin):
+    pass
 
 
-class ContentItemAdmin(MultilingualModelAdmin):
+class ContentItemAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
     fieldsets = (
@@ -38,12 +89,12 @@ class ContentItemAdmin(MultilingualModelAdmin):
     search_fields = ('name', get_editor_field_name('content_html'))
 
 
-class PageContentItemInline(admin.TabularInline):
+class PageContentItemInline(UserPermissionMixin, admin.TabularInline):
     model = PageContentItem
     extra = 1
 
 
-class PageAdmin(MultilingualModelAdmin):
+class PageAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
 
     form = forms.PageForm
     fieldsets = (
@@ -53,9 +104,9 @@ class PageAdmin(MultilingualModelAdmin):
     )
 
     inlines = (PageContentItemInline,)
-    list_display = ('title', 'view_on_site', 'url', 'redirect_page','get_absolute_url', 'action_links',)
+    list_display = ('title', 'view_on_site', 'url', 'redirect_page', 'get_absolute_url', 'action_links')
     list_per_page = 1000
-    search_fields = ('title', 'url', 'redirect_page')
+    search_fields = ('title', 'url', 'redirect_page__title')
 
     def view_on_site(self, page):
         view_on_site = ''
@@ -63,7 +114,7 @@ class PageAdmin(MultilingualModelAdmin):
         absolute_url = page.get_absolute_url()
         if absolute_url:
             view_on_site += u'<a href="%s" title="%s" target="_blank"><img src="%sfiber/admin/images/world.gif" width="16" height="16" alt="%s" /></a>' % \
-                       (absolute_url, _('View on site'), settings.STATIC_URL, _('View on site'))
+                            (absolute_url, _('View on site'), settings.STATIC_URL, _('View on site'))
 
         return view_on_site
 
@@ -94,7 +145,7 @@ class PageAdmin(MultilingualModelAdmin):
     action_links.allow_tags = True
 
 
-class FiberAdminContentItemAdmin(MultilingualModelAdmin):
+class FiberAdminContentItemAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
 
@@ -112,7 +163,7 @@ class FiberAdminContentItemAdmin(MultilingualModelAdmin):
             )
 
 
-class FiberAdminPageAdmin(MultilingualModelAdmin):
+class FiberAdminPageAdmin(UserPermissionMixin, fiber_admin.MultilingualModelAdmin):
 
     form = forms.PageForm
 
@@ -132,6 +183,10 @@ class FiberAdminPageAdmin(MultilingualModelAdmin):
             )
 
     def save_model(self, request, obj, form, change):
+        """
+        - Optionally positions a Page `obj` before or beneath another page, based on POST data.
+        - Notifies the PERMISSION_CLASS that a Page was created by `user`.
+        """
         if 'before_page_id' in request.POST:
             before_page = Page.objects.get(pk=int(request.POST['before_page_id']))
             obj.parent = before_page.parent

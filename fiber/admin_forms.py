@@ -5,10 +5,11 @@ from mptt.forms import TreeNodeChoiceField
 
 from multilingual.forms.forms import MultilingualModelForm
 
-from app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES
-from models import Page, ContentItem
-from utils.urls import is_quoted_url
-from fiber.editor import get_editor_field_name
+from .editor import get_editor_field_name
+
+from .app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES
+from .models import Page, ContentItem
+from fiber.utils.urls import is_quoted_url
 
 
 class ContentItemAdminForm(MultilingualModelForm):
@@ -27,8 +28,8 @@ class ContentItemAdminForm(MultilingualModelForm):
 
 class PageForm(MultilingualModelForm):
 
-    parent = TreeNodeChoiceField(queryset=Page.tree.all(), level_indicator=3*unichr(160), empty_label='---------', required=False)
-    redirect_page = TreeNodeChoiceField(label=_('Redirect page'), queryset=Page.objects.filter(redirect_page__isnull=True), level_indicator=3*unichr(160), empty_label='---------', required=False)
+    parent = TreeNodeChoiceField(queryset=Page.tree.all(), level_indicator=3 * unichr(160), empty_label='---------', required=False)
+    redirect_page = TreeNodeChoiceField(label=_('Redirect page'), queryset=Page.objects.filter(redirect_page__isnull=True), level_indicator=3 * unichr(160), empty_label='---------', required=False)
 
     class Meta:
         model = Page

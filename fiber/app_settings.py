@@ -17,11 +17,21 @@ if not hasattr(settings, 'MPTT_ADMIN_LEVEL_INDENT'):
 
 EDITOR = getattr(settings, 'FIBER_EDITOR', 'fiber.editor_definitions.ckeditor.EDITOR')
 
+PAGE_MANAGER = getattr(settings, 'FIBER_PAGE_MANAGER', 'fiber.managers.PageManager')
+CONTENT_ITEM_MANAGER = getattr(settings, 'FIBER_CONTENT_ITEM_MANAGER', 'fiber.managers.ContentItemManager')
+
 METADATA_PAGE_SCHEMA = getattr(settings, 'FIBER_METADATA_PAGE_SCHEMA', {})
 METADATA_CONTENT_SCHEMA = getattr(settings, 'FIBER_METADATA_CONTENT_SCHEMA', {})
 
+API_RENDER_HTML = getattr(settings, 'API_RENDER_HTML', False)
+
+"""
+Point this class to your own Permission Class as declared in :mod:`fiber.permissions`.
+"""
+PERMISSION_CLASS = getattr(settings, 'PERMISSION_CLASS', 'fiber.permissions.Permissions')
+
 if 'fiber.middleware.PageFallbackMiddleware' in settings.MIDDLEWARE_CLASSES:
-    raise DeprecationWarning( \
+    raise DeprecationWarning(
         "fiber.middleware.PageFallbackMiddleware has been removed.\n"
         "See README.rst for new implementation details.\n"
         "It basically boils down to this:\n"

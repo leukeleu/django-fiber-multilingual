@@ -3,9 +3,15 @@ import operator
 from django import template
 from django.utils import simplejson
 
+from fiber import __version__ as fiber_version_number
+
 from fiber.models import Page, ContentItem
 
 from fiber.utils.urls import get_admin_change_url
+from fiber.app_settings import PERMISSION_CLASS
+from fiber.utils import class_loader
+
+PERMISSIONS = class_loader.load_class(PERMISSION_CLASS)
 
 register = template.Library()
 
@@ -169,12 +175,15 @@ class ShowPageContentNode(template.Node):
                 content_item.page_content_item = page_content_item
                 content_items.append(content_item)
 
-            context['ContentItem'] = ContentItem
+            context.push()
             context['fiber_page'] = page
+            context['ContentItem'] = ContentItem
             context['fiber_block_name'] = self.block_name
             context['fiber_content_items'] = content_items
             t = template.loader.get_template('fiber/content_items.html')
-            return t.render(context)
+            content = t.render(context)
+            context.pop()
+            return content
 
         except template.VariableDoesNotExist:
             # page does not exist in the context
@@ -243,3 +252,13 @@ def escape_json_for_html(value):
     Escapes valid JSON for use in HTML, e.g. convert single quote to HTML character entity
     """
     return value.replace("'", "&#39;")
+
+
+@register.filter
+def can_edit(obj, user):
+    return PERMISSIONS.can_edit(user, obj)
+
+
+@register.simple_tag()
+def fiber_version():
+    return fiber_version_number

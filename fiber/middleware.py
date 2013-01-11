@@ -1,5 +1,5 @@
-import re
 import random
+import re
 
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -7,12 +7,9 @@ from django.template import loader, RequestContext
 from django.utils.encoding import smart_unicode
 from django.utils import simplejson
 
-from utils.import_util import import_element
-
-from app_settings import LOGIN_STRING, EXCLUDE_URLS, EDITOR
-
-from models import ContentItem
-from models import Page
+from .app_settings import LOGIN_STRING, EXCLUDE_URLS, EDITOR
+from .models import ContentItem, Page
+from .utils.import_util import import_element
 
 
 class AdminPageMiddleware(object):
@@ -58,10 +55,10 @@ class AdminPageMiddleware(object):
                         c = RequestContext(request, {
                             'logout_url': self.get_logout_url(request),
                             'pages_json': simplejson.dumps(
-                                Page.objects.create_jqtree_data()
+                                Page.objects.create_jqtree_data(request.user)
                             ),
                             'content_items_json': simplejson.dumps(
-                                ContentItem.objects.get_content_groups()
+                                ContentItem.objects.get_content_groups(request.user)
                             )
                         })
 
@@ -72,8 +69,10 @@ class AdminPageMiddleware(object):
                         ).replace('</body>', '</div>' + t.render(c) + '</body>')
 
                         fiber_data['frontend'] = True
-                        if 'fiber_page' in c:
-                            fiber_data['page_id'] = c['fiber_page'].id
+                        try:
+                            fiber_data['page_id'] = Page.objects.get_by_url(request.path_info).pk
+                        except AttributeError:
+                            pass
 
                 # Inject header html in head.
                 # Add fiber-data attribute to body tag.
