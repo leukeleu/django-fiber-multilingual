@@ -28,6 +28,7 @@ class ContentItemAdminForm(MultilingualModelForm):
 
 class PageForm(MultilingualModelForm):
 
+    meta_description = forms.CharField(widget=forms.Textarea, required=False)
     parent = TreeNodeChoiceField(queryset=Page.tree.all(), level_indicator=3 * unichr(160), empty_label='---------', required=False)
     redirect_page = TreeNodeChoiceField(label=_('Redirect page'), queryset=Page.objects.filter(redirect_page__isnull=True), level_indicator=3 * unichr(160), empty_label='---------', required=False)
 
