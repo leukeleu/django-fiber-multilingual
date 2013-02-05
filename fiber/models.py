@@ -245,6 +245,14 @@ class Page(MultilingualModel):
     def is_public_for_user(self, user):
         return user.is_staff or self.is_public
 
+    def has_visible_children(self):
+        visible_children = [page for page in self.get_children() if page.show_in_menu]
+        if visible_children:
+            return True
+        else:
+            return False
+
+
 mptt.register(Page)
 
 
