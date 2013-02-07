@@ -19,7 +19,7 @@ setup(
     install_requires=[
         'Pillow==1.7.8',
         'django-mptt==0.5.5',
-        'django-compressor>=0.7.1',
+        'django-compressor>=1.2',
         'djangorestframework==2.1.17'
     ],
 
