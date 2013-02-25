@@ -1,7 +1,7 @@
 [![Travis build image][travis-build-image]][travis]
 
-[travis]: http://travis-ci.org/#!/ridethepony/django-fiber
-[travis-build-image]: https://secure.travis-ci.org/ridethepony/django-fiber.png
+[travis]: http://travis-ci.org/#!/leukeleu/django-fiber-multilingual
+[travis-build-image]: https://secure.travis-ci.org/leukeleu/django-fiber-multilingual.png
 
 # Django Fiber
 
