@@ -20,7 +20,7 @@ setup(
         'Pillow==1.7.8',
         'django-mptt==0.5.5',
         'django-compressor>=1.2',
-        'djangorestframework==2.1.17',
+        'djangorestframework==2.2.3',
         'django-multilingual-ds9==0.3.0.6',
     ],
     dependency_links=[
