@@ -15,5 +15,4 @@ script:
   - python manage.py jenkins
 branches:
   only:
-    - master
-    - dev
+    - multilingual
