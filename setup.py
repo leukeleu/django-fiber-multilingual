@@ -21,10 +21,10 @@ setup(
         'django-mptt==0.5.5',
         'django-compressor==1.3',
         'djangorestframework==2.2.6',
-        'django-multilingual-ds9==0.3.0.6',
+        'django-multilingual-ds9==0.3.0.7',
     ],
     dependency_links=[
-        'https://github.com/leukeleu/django-multilingual-ds9/tarball/0.3.0.6#egg=django-multilingual-ds9-0.3.0.6',
+        'https://github.com/leukeleu/django-multilingual-ds9/tarball/0.3.0.7#egg=django-multilingual-ds9-0.3.0.7',
     ],
 
     description='Django Fiber - a simple, user-friendly CMS for all your Django projects',
