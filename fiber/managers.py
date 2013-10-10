@@ -4,7 +4,7 @@ import re
 from django.db import models
 from django.utils.translation import ugettext, ugettext_lazy as _
 
-from multilingual.db.models.manager import MultilingualManager
+from hvad.manager import TranslationManager
 
 from . import editor
 from .utils.urls import get_named_url_from_quoted_url
@@ -13,7 +13,7 @@ from .utils.class_loader import load_class
 from .app_settings import PERMISSION_CLASS
 
 
-class ContentItemManager(MultilingualManager):
+class ContentItemManager(TranslationManager):
 
     def get_content_groups(self, user=None):
         """
@@ -117,7 +117,7 @@ class ContentItemManager(MultilingualManager):
                     content_item.save()
 
 
-class PageManager(MultilingualManager):
+class PageManager(TranslationManager):
 
     def link_parent_objects(self, pages):
         """

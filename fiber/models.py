@@ -8,14 +8,13 @@ from django.core.files.images import get_image_dimensions
 from django.db import models
 from django.utils.html import strip_tags
 from django.utils import simplejson
-from django.utils.translation import ugettext
+from django.utils.translation import ugettext, get_language
 from django.utils.translation import ugettext_lazy as _
 
 import mptt
 from mptt.managers import TreeManager
 
-from multilingual import languages
-from multilingual.db.models.base import MultilingualModel
+from hvad.models import TranslatableModel, TranslatedFields
 
 from .app_settings import IMAGES_DIR, FILES_DIR, METADATA_PAGE_SCHEMA, METADATA_CONTENT_SCHEMA, \
     PAGE_MANAGER, CONTENT_ITEM_MANAGER
@@ -25,7 +24,7 @@ from .utils.json import JSONField
 from .utils.urls import get_named_url_from_quoted_url, is_quoted_url
 
 
-class ContentItem(MultilingualModel):
+class ContentItem(TranslatableModel):
     created = models.DateTimeField(_('created'), auto_now_add=True)
     updated = models.DateTimeField(_('updated'), auto_now=True)
     name = models.CharField(_('name'), blank=True, max_length=255)
@@ -35,9 +34,11 @@ class ContentItem(MultilingualModel):
     used_on_pages_data = JSONField(_('used on pages'), blank=True, null=True)
     must_translate = models.BooleanField(default=True)
 
-    class Translation:
-        content_markup = FiberMarkupField(verbose_name=_('Content'))
-        content_html = FiberHTMLField(verbose_name=_('Content'))
+    translations = TranslatedFields(
+        content_markup=FiberMarkupField(verbose_name=_('Content')),
+        content_html=FiberHTMLField(verbose_name=_('Content')),
+        meta=dict(db_table='fiber_contentitemtranslation')
+    )
 
     objects = load_class(CONTENT_ITEM_MANAGER)
 
@@ -63,7 +64,7 @@ class ContentItem(MultilingualModel):
         named_url = 'fiber_admin:%s_%s_change' % (self._meta.app_label, self._meta.object_name.lower())
         return '%s?language=%s' % (
             reverse(named_url, args=(self.id,)),
-            languages.get_active()
+            get_language()
         )
 
     def set_used_on_pages_json(self):
@@ -83,12 +84,11 @@ class ContentItem(MultilingualModel):
         return simplejson.dumps(self.used_on_pages_data)
 
 
-class Page(MultilingualModel):
+class Page(TranslatableModel):
     created = models.DateTimeField(_('created'), auto_now_add=True)
     updated = models.DateTimeField(_('updated'), auto_now=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='subpages', verbose_name=_('parent'))
     meta_description = models.CharField(max_length=255, blank=True)
-    title = models.CharField(_('title'), max_length=255)
     url = FiberURLField(blank=True)
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', verbose_name=_('redirect page'), on_delete=models.SET_NULL)
     mark_current_regexes = models.TextField(_('mark current regexes'), blank=True)
@@ -101,8 +101,10 @@ class Page(MultilingualModel):
     metadata = JSONField(blank=True, null=True, schema=METADATA_PAGE_SCHEMA, prefill_from='fiber.models.Page')
     must_translate = models.BooleanField(default=True)
 
-    class Translation:
-        title = models.CharField(_('title'), blank=True, max_length=255)
+    translations = TranslatedFields(
+        title=models.CharField(_('title'), blank=True, max_length=255),
+        meta=dict(db_table='fiber_pagetranslation')
+    )
 
     tree = TreeManager()
     objects = load_class(PAGE_MANAGER)
@@ -113,7 +115,7 @@ class Page(MultilingualModel):
         ordering = ('tree_id', 'lft')
 
     def __unicode__(self):
-        return self.title_en
+        return self.title
 
     def save(self, *args, **kwargs):
         if self.id:
@@ -155,7 +157,7 @@ class Page(MultilingualModel):
         named_url = 'fiber_admin:%s_%s_change' % (self._meta.app_label, self._meta.object_name.lower())
         return '%s?language=%s' % (
             reverse(named_url, args=(self.id,)),
-            languages.get_active()
+            get_language()
         )
 
     def get_content_for_block(self, block_name):
@@ -211,7 +213,7 @@ class Page(MultilingualModel):
             - inside: move the page inside the target page (as the first child)
         """
         old_url = self.get_absolute_url()
-        target_page = Page.tree.get(id=target_id)
+        target_page = Page.objects.get(id=target_id)
 
         if position == 'before':
             self.move_to(target_page, 'left')

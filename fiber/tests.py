@@ -136,13 +136,16 @@ class PageTest(TestCase):
         ---------def (/def/)  # absolute url
         ---------ghi (/section2/ghi/)
         """
+        def get_page(page_id):
+            return Page.objects.get(id=page_id)
+
         page_home_id = Page.objects.create(title='home').id
-        page_section1_id = Page.objects.create(title='section1', parent_id=page_home_id, url='section1').id
-        page_section2_id = Page.objects.create(title='section2', parent_id=page_home_id, url='section2').id
-        page_abc_id = Page.objects.create(title='abc', parent_id=page_section1_id, url='abc').id
-        Page.objects.create(title='xyz', parent_id=page_abc_id, url='xyz')
-        page_def_id = Page.objects.create(title='def', parent_id=page_section2_id, url='/def/').id  # absolute url
-        page_ghi_id = Page.objects.create(title='ghi', parent_id=page_section2_id, url='ghi').id
+        page_section1_id = Page.objects.create(title='section1', parent=get_page(page_home_id), url='section1').id
+        page_section2_id = Page.objects.create(title='section2', parent=get_page(page_home_id), url='section2').id
+        page_abc_id = Page.objects.create(title='abc', parent=get_page(page_section1_id), url='abc').id
+        Page.objects.create(title='xyz', parent=get_page(page_abc_id), url='xyz')
+        page_def_id = Page.objects.create(title='def', parent=get_page(page_section2_id), url='/def/').id  # absolute url
+        page_ghi_id = Page.objects.create(title='ghi', parent=get_page(page_section2_id), url='ghi').id
 
         page_def = Page.objects.get(id=page_def_id)
         page_ghi = Page.objects.get(id=page_ghi_id)
@@ -164,12 +167,12 @@ class PageTest(TestCase):
         )
 
         # move 'abc' to 'section2', as first child
-        page_section2 = Page.objects.get(title='section2')
-        page_abc = Page.objects.get(title='abc')
+        page_section2 = Page.objects.language().get(title='section2')
+        page_abc = Page.objects.language().get(title='abc')
 
         page_abc.move_page(page_section2.id, 'inside')
 
-        page_abc = Page.objects.get(title='abc')  # reload the page
+        page_abc = Page.objects.language().get(title='abc')  # reload the page
         self.assertEquals(page_abc.parent.title, 'section2')
         self.assertEquals(page_abc.get_previous_sibling(), None)
         self.assertEquals(page_abc.get_next_sibling().title, 'def')
@@ -189,13 +192,13 @@ class PageTest(TestCase):
         )
 
         # move 'xyz' to 'section2', to the right of 'def'
-        page_xyz = Page.objects.get(title='xyz')
-        page_def = Page.objects.get(title='def')
-        page_section2 = Page.objects.get(title='section2')
+        page_xyz = Page.objects.language().get(title='xyz')
+        page_def = Page.objects.language().get(title='def')
+        page_section2 = Page.objects.language().get(title='section2')
 
         page_xyz.move_page(page_def.id, 'after')
 
-        page_xyz = Page.objects.get(title='xyz')  # reload the page
+        page_xyz = Page.objects.language().get(title='xyz')  # reload the page
         self.assertEquals(page_xyz.parent.title, 'section2')
         self.assertEquals(page_xyz.get_previous_sibling().title, 'def')
         self.assertEquals(page_xyz.get_next_sibling().title, 'ghi')
@@ -204,7 +207,7 @@ class PageTest(TestCase):
 
         def test_url(title, url):
             self.assertEquals(
-                Page.objects.get(title=title).get_absolute_url(),
+                Page.objects.language().get(title=title).get_absolute_url(),
                 url
             )
 
@@ -221,19 +224,22 @@ class PageTest(TestCase):
         # generate data
         self.generate_data()
 
+        # Content item 'a' links to page abc. The url is /section1/abc/.
         ContentItem.objects.create(
             name='a',
             content_markup='"abc":/section1/abc/',
             content_html='<p><a href="/section1/abc/">abc</a></p>'
         )
+
+        # Content item 'b' links to page xyz. Page xyz is a child page abc. Its url is /section1/abc/xyz/.
         ContentItem.objects.create(
             name='b',
             content_markup='"xyz":/section1/abc/xyz/',
             content_html='<p><a href="/section1/abc/xyz/">xyz</a></p>'
         )
 
-        # change relative url of page 'abc'
-        page_abc = Page.objects.get(title='abc')
+        # Change relative url of page 'abc' from 'abc' to 'a_b_c'.
+        page_abc = Page.objects.language().get(title='abc')
         page_abc.url = 'a_b_c'
         page_abc.save()
 
@@ -250,6 +256,11 @@ class PageTest(TestCase):
             ),
             '<p><a href="/section1/a_b_c/xyz/">xyz</a></p>'
         )
+
+    def test_create_jqtree_data(self):
+        user = User.objects.create_user(username='u1')
+
+        Page.objects.create_jqtree_data(user)
 
 
 class PageContentItemTest(TestCase):
@@ -495,6 +506,9 @@ class TestTemplateTags(TestCase):
                  '</ul>'))
 
     def test_show_admin_menu_all(self):
+        def get_page_id_by_title(title):
+            return Page.objects.language().get(title=title).id
+
         # render menu with all pages
         t = Template("""
             {% load fiber_tags %}
@@ -506,39 +520,52 @@ class TestTemplateTags(TestCase):
             'fiber_page': Page.objects.get_by_url('/'),
         })
 
+        ids = dict(
+            main_page_id=get_page_id_by_title('main'),
+            home_page_id=get_page_id_by_title('home'),
+            section1_id=get_page_id_by_title('section1'),
+            section2_id=get_page_id_by_title('section2'),
+            sub1_id=get_page_id_by_title('sub1'),
+            sub2_id=get_page_id_by_title('sub2'),
+        )
+
+        context = dict(
+            fiber_admin_page_add_url=reverse('fiber_admin:fiber_page_add'),
+            fiber_admin_page_edit_url_home='%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(ids['home_page_id'],)),
+            fiber_admin_page_edit_url_section1='%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(ids['section1_id'],)),
+            fiber_admin_page_edit_url_section2='%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(ids['section2_id'],)),
+            fiber_admin_page_edit_url_sub1='%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(ids['sub1_id'],)),
+            fiber_admin_page_edit_url_sub2='%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(ids['sub2_id'],)),
+        )
+        context.update(ids)
+
         # Number of queries increased from 2 to 7 because of multilingual.
         with self.assertNumQueries(7):
             self.assertEquals(
                 condense_html_whitespace(t.render(c)),
-                ('<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 1 }\'>'
+                ('<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": %(main_page_id)d }\'>'
                    '<li class="home first last">'
-                     '<a href="/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 2, "parent_id": 1, "url": "%(fiber_admin_page_edit_url_home)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>home</a>'
-                     '<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 2 }\'>'
+                     '<a href="/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": %(home_page_id)d, "parent_id": %(main_page_id)d, "url": "%(fiber_admin_page_edit_url_home)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>home</a>'
+                     '<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": %(home_page_id)d }\'>'
                        '<li class="section1 first">'
-                         '<a href="/section1/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 3, "parent_id": 2, "url": "%(fiber_admin_page_edit_url_section1)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>section1</a>'
-                         '<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 3 }\'>'
+                         '<a href="/section1/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": %(section1_id)d, "parent_id": %(home_page_id)d, "url": "%(fiber_admin_page_edit_url_section1)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>section1</a>'
+                         '<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": %(section1_id)d }\'>'
                            '<li class="sub1 first">'
-                             '<a href="/section1/sub1/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 5, "parent_id": 3, "url": "%(fiber_admin_page_edit_url_sub1)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>sub1</a>'
+                             '<a href="/section1/sub1/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": %(sub1_id)d, "parent_id": %(section1_id)d, "url": "%(fiber_admin_page_edit_url_sub1)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>sub1</a>'
                            '</li>'
                            '<li class="sub2 last">'
-                             '<a href="/section1/sub2/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 6, "parent_id": 3, "url": "%(fiber_admin_page_edit_url_sub2)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>sub2</a>'
+                             '<a href="/section1/sub2/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": %(sub2_id)d, "parent_id": %(section1_id)d, "url": "%(fiber_admin_page_edit_url_sub2)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>sub2</a>'
                            '</li>'
                          '</ul>'
                        '</li>'
                        '<li class="section2 last">'
-                         '<a href="/section2/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": 4, "parent_id": 2, "url": "%(fiber_admin_page_edit_url_section2)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>section2</a>'
+                         '<a href="/section2/" data-fiber-data=\'{ "can_edit": true, "type": "page", "id": %(section2_id)d, "parent_id": %(home_page_id)d, "url": "%(fiber_admin_page_edit_url_section2)s", "add_url": "%(fiber_admin_page_add_url)s" }\'>section2</a>'
                        '</li>'
                      '</ul>'
                    '</li>'
-                 '</ul>' % {
-                        'fiber_admin_page_add_url': reverse('fiber_admin:fiber_page_add'),
-                        'fiber_admin_page_edit_url_home': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(2, )),
-                        'fiber_admin_page_edit_url_section1': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(3, )),
-                        'fiber_admin_page_edit_url_section2': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(4, )),
-                        'fiber_admin_page_edit_url_sub1': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(5, )),
-                        'fiber_admin_page_edit_url_sub2': '%s?language=en' % reverse('fiber_admin:fiber_page_change', args=(6, )),
-                        }
-                 ))
+                 '</ul>' % context
+                 )
+            )
 
     def test_show_page_content(self):
         # The show_page_content templatetag should support rendering content from multiple pages in one view.

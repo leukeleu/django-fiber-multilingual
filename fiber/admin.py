@@ -4,12 +4,13 @@ from django.contrib.admin.util import model_ngettext
 from django.utils.translation import ugettext_lazy as _
 from django.core.exceptions import PermissionDenied
 
-from multilingual.admin.options import MultilingualModelAdmin
+from hvad.admin import TranslatableAdmin
 
 from . import admin_forms as forms
 from . import fiber_admin
 from .app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES, PERMISSION_CLASS
 from .editor import get_editor_field_name
+from .fiber_admin import ModelAdmin
 from .models import Page, ContentItem, PageContentItem, Image, File
 from .utils.class_loader import load_class
 
@@ -48,7 +49,7 @@ class UserPermissionMixin(object):
         perms.object_created(request.user, obj)
 
 
-class FileAdmin(UserPermissionMixin, MultilingualModelAdmin):
+class FileAdmin(UserPermissionMixin, ModelAdmin):
     list_display = ('__unicode__', 'title', )
     date_hierarchy = 'updated'
     search_fields = ('title', )
@@ -79,7 +80,7 @@ class ImageAdmin(FileAdmin):
     pass
 
 
-class ContentItemAdmin(UserPermissionMixin, MultilingualModelAdmin):
+class ContentItemAdmin(UserPermissionMixin, TranslatableAdmin):
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
     fieldsets = (
@@ -96,7 +97,7 @@ class PageContentItemInline(UserPermissionMixin, admin.TabularInline):
     extra = 1
 
 
-class PageAdmin(UserPermissionMixin, MultilingualModelAdmin):
+class PageAdmin(UserPermissionMixin, ModelAdmin):
 
     form = forms.PageForm
     fieldsets = (
@@ -106,7 +107,7 @@ class PageAdmin(UserPermissionMixin, MultilingualModelAdmin):
     )
 
     inlines = (PageContentItemInline,)
-    list_display = ('title', 'view_on_site', 'url', 'redirect_page', 'get_absolute_url', 'action_links')
+    list_display = ('__unicode__', 'view_on_site', 'url', 'redirect_page', 'get_absolute_url', 'action_links')
     list_per_page = 1000
     search_fields = ('title', 'url', 'redirect_page__title')
 
@@ -147,7 +148,7 @@ class PageAdmin(UserPermissionMixin, MultilingualModelAdmin):
     action_links.allow_tags = True
 
 
-class FiberAdminContentItemAdmin(UserPermissionMixin, MultilingualModelAdmin):
+class FiberAdminContentItemAdmin(UserPermissionMixin, TranslatableAdmin):
     list_display = ('__unicode__',)
     form = forms.ContentItemAdminForm
 
@@ -165,7 +166,7 @@ class FiberAdminContentItemAdmin(UserPermissionMixin, MultilingualModelAdmin):
             )
 
 
-class FiberAdminPageAdmin(UserPermissionMixin, MultilingualModelAdmin):
+class FiberAdminPageAdmin(UserPermissionMixin, ModelAdmin):
 
     form = forms.PageForm
 
