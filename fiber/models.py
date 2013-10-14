@@ -51,7 +51,8 @@ class ContentItem(TranslatableModel):
         if self.name:
             return self.name
         else:
-            contents = ' '.join(strip_tags(self.content_html).strip().split())
+            content_html = self.lazy_translation_getter('content_html') or ''
+            contents = ' '.join(strip_tags(content_html).strip().split())
             if len(contents) > 50:
                 contents = contents[:50] + '...'
             return contents or ugettext('[ EMPTY ]')  # TODO: find out why ugettext_lazy doesn't work here
@@ -120,7 +121,7 @@ class Page(TranslatableModel):
         ordering = ('tree_id', 'lft')
 
     def __unicode__(self):
-        return self.title
+        return self.lazy_translation_getter('title')
 
     def save(self, *args, **kwargs):
         if self.id:
