@@ -1,13 +1,11 @@
 import os
-
+import json
 import warnings
 
-from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.files.images import get_image_dimensions
 from django.db import models
 from django.utils.html import strip_tags
-from django.utils import simplejson
 from django.utils.translation import ugettext, get_language
 from django.utils.translation import ugettext_lazy as _
 
@@ -16,10 +14,13 @@ from mptt.managers import TreeManager
 
 from hvad.models import TranslatableModel, TranslatedFields
 
-from .app_settings import IMAGES_DIR, FILES_DIR, METADATA_PAGE_SCHEMA, METADATA_CONTENT_SCHEMA, \
-    PAGE_MANAGER, CONTENT_ITEM_MANAGER
+from .app_settings import (
+    IMAGES_DIR, FILES_DIR, METADATA_PAGE_SCHEMA, METADATA_CONTENT_SCHEMA,
+    PAGE_MANAGER, CONTENT_ITEM_MANAGER, LIST_THUMBNAIL_OPTIONS
+)
 from .utils.class_loader import load_class
 from .utils.fields import FiberURLField, FiberMarkupField, FiberHTMLField
+from .utils.images import get_thumbnail, get_thumbnail_url
 from .utils.json import JSONField
 from .utils.urls import get_named_url_from_quoted_url, is_quoted_url
 
@@ -81,7 +82,7 @@ class ContentItem(TranslatableModel):
         if self.used_on_pages_data is None:
             self.set_used_on_pages_json()
 
-        return simplejson.dumps(self.used_on_pages_data)
+        return json.dumps(self.used_on_pages_data)
 
 
 class Page(TranslatableModel):
@@ -89,6 +90,10 @@ class Page(TranslatableModel):
     updated = models.DateTimeField(_('updated'), auto_now=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='subpages', verbose_name=_('parent'))
     meta_description = models.CharField(max_length=255, blank=True)
+
+    meta_keywords = models.CharField(max_length=255, blank=True)
+    doc_title = models.CharField(_('document title'), max_length=255, blank=True)
+
     url = FiberURLField(blank=True)
     redirect_page = models.ForeignKey('self', null=True, blank=True, related_name='redirected_pages', verbose_name=_('redirect page'), on_delete=models.SET_NULL)
     mark_current_regexes = models.TextField(_('mark current regexes'), blank=True)
@@ -302,7 +307,7 @@ class Image(models.Model):
     class Meta:
         verbose_name = _('image')
         verbose_name_plural = _('images')
-        ordering = ('image', )
+        ordering = ('-updated', )
 
     def __unicode__(self):
         return self.image.name
@@ -328,6 +333,22 @@ class Image(models.Model):
 
     def get_size(self):
         return '%s x %d' % (self.width, self.height)
+    get_size.short_description = _('Size')
+
+    def thumbnail(self):
+        return get_thumbnail(self.image, thumbnail_options=LIST_THUMBNAIL_OPTIONS)
+
+    def thumbnail_url(self):
+        return get_thumbnail_url(self.image, thumbnail_options=LIST_THUMBNAIL_OPTIONS)
+
+    def preview(self):
+        thumbnail = get_thumbnail(self.image, thumbnail_options=LIST_THUMBNAIL_OPTIONS)
+        if thumbnail:
+            return u'<img src="{0}" width="{1}" height="{2}" />'.format(thumbnail.url, thumbnail.width, thumbnail.height)
+        else:
+            return _('Not available')
+    preview.short_description = _('Preview')
+    preview.allow_tags = True
 
 
 class File(models.Model):
@@ -339,7 +360,7 @@ class File(models.Model):
     class Meta:
         verbose_name = _('file')
         verbose_name_plural = _('files')
-        ordering = ('file', )
+        ordering = ('-updated', )
 
     def __unicode__(self):
         return self.file.name

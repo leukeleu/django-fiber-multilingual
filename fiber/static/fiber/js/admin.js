@@ -797,7 +797,11 @@ Fiber.ImageSelectDialog = BaseFileSelectDialog.extend({
 		function thumbnail_formatter(value, row_data) {
 			// insert the url that ckeditor looks for. Use HTML5 data attribute instead?
 			// TODO: use image checksum for cache busting?
-			return '<span style="display: none;">' + row_data.image_url + '</span>' + '<img src="' + row_data.image_url + '?_c=' + encodeURIComponent(row_data.url) + '" title="' + row_data.title + '"/>';
+			var thumbnail_url = row_data.thumbnail_url;
+			if (thumbnail_url === null) {
+				thumbnail_url = row_data.image_url;
+			}
+			return '<span style="display: none;">' + row_data.image_url + '</span>' + '<img src="' + thumbnail_url + '?_c=' + encodeURIComponent(row_data.url) + '" title="' + row_data.title + '"/>';
 		}
 
 		this.select_grid.simple_datagrid({
@@ -979,8 +983,8 @@ Fiber.PageSelectDialog = AdminRESTDialog.extend({
 
 		function createLi(node, $li) {
 			if (node.change_url) {
-				$li.find('.jqtree-title').before('<span class="icon"></span>');
-				$li.find('div').addClass('page');
+				$li.find('.jqtree-title').before('<span class="df-icon"></span>');
+				$li.find('div').addClass('df-page');
 			}
 		}
 
@@ -1425,23 +1429,23 @@ var adminPage = {
 		function createLi(node, $li) {
 			if (node.change_url) {
 				var $div = $li.find('div');
-				$li.find('.jqtree-title').before('<span class="icon"></span>');
-				$div.addClass('page');
+				$li.find('.jqtree-title').before('<span class="df-icon"></span>');
+				$div.addClass('df-page');
 
 				if (!node.show_in_menu) {
-					$div.addClass('hidden-in-menu');
+					$div.addClass('df-hidden-in-menu');
 				}
 
 				if (!node.is_public) {
-					$div.addClass('non-public');
+					$div.addClass('df-non-public');
 				}
 
 				if (node.is_redirect) {
-					$div.addClass('redirect');
+					$div.addClass('df-redirect');
 				}
 
 				if (!node.editable) {
-					$div.addClass('non-editable');
+					$div.addClass('df-non-editable');
 				}
 			}
 		}

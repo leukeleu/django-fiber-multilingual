@@ -122,6 +122,7 @@ INSTALLED_APPS = (
     'hvad',
     'mptt',
     'compressor',
+    'easy_thumbnails',
     'fiber',
     'django.contrib.auth',
     'django.contrib.contenttypes',

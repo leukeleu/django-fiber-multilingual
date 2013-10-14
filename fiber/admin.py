@@ -8,11 +8,12 @@ from hvad.admin import TranslatableAdmin
 
 from . import admin_forms as forms
 from . import fiber_admin
-from .app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES, PERMISSION_CLASS
+from .app_settings import TEMPLATE_CHOICES, CONTENT_TEMPLATE_CHOICES, PERMISSION_CLASS, IMAGE_PREVIEW
 from .editor import get_editor_field_name
 from .fiber_admin import ModelAdmin
 from .models import Page, ContentItem, PageContentItem, Image, File
 from .utils.class_loader import load_class
+from .utils.widgets import AdminImageWidgetWithPreview
 
 perms = load_class(PERMISSION_CLASS)
 
@@ -50,14 +51,15 @@ class UserPermissionMixin(object):
 
 
 class FileAdmin(UserPermissionMixin, ModelAdmin):
-    list_display = ('__unicode__', 'title', )
+    list_display = ('__unicode__', 'title', 'updated',)
     date_hierarchy = 'updated'
     search_fields = ('title', )
     actions = ['really_delete_selected']
 
     def get_actions(self, request):
         actions = super(FileAdmin, self).get_actions(request)
-        del actions['delete_selected']  # the original delete selected action doesn't remove associated files, because .delete() is never called
+        if 'delete_selected' in actions:
+            del actions['delete_selected']  # the original delete selected action doesn't remove associated files, because .delete() is never called
         return actions
 
     def really_delete_selected(self, request, queryset):
@@ -77,11 +79,26 @@ class FileAdmin(UserPermissionMixin, ModelAdmin):
 
 
 class ImageAdmin(FileAdmin):
-    pass
+    list_display = ('__unicode__', 'title', 'get_size', 'updated',)
+    fieldsets = (
+        (None, {'fields': ('image', 'title',)}),
+        (_('Size'), {'classes': ('collapse',), 'fields': ('width', 'height',)}),
+    )
+
+
+class ImageAdminWithPreview(ImageAdmin):
+    list_display = ('preview', '__unicode__', 'title', 'get_size', 'updated',)
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        if db_field.name == 'image':
+            request = kwargs.pop("request", None)
+            kwargs['widget'] = AdminImageWidgetWithPreview
+            return db_field.formfield(**kwargs)
+        return super(ImageAdminWithPreview, self).formfield_for_dbfield(db_field, **kwargs)
 
 
 class ContentItemAdmin(UserPermissionMixin, TranslatableAdmin):
-    list_display = ('__unicode__',)
+    list_display = ('__unicode__', 'unused')
     form = forms.ContentItemAdminForm
     fieldsets = (
         (None, {'fields': ('name', get_editor_field_name('content_html'),)}),
@@ -90,6 +107,12 @@ class ContentItemAdmin(UserPermissionMixin, TranslatableAdmin):
     )
     date_hierarchy = 'updated'
     search_fields = ('name', get_editor_field_name('content_html'))
+
+    def unused(self, obj):
+        if obj.used_on_pages_data is None:
+            return True
+        return False
+    unused.boolean = True
 
 
 class PageContentItemInline(UserPermissionMixin, admin.TabularInline):
@@ -178,13 +201,13 @@ class FiberAdminPageAdmin(UserPermissionMixin, ModelAdmin):
             self.fieldsets = (
                 (None, {'fields': ('title', 'url', )}),
                 (_('Advanced options'), {'fields': ('redirect_page', 'show_in_menu', 'is_public', )}),
-                (_('SEO'), {'fields': ('meta_description', )}),
+                (_('SEO'), {'fields': ('doc_title', 'meta_description', 'meta_keywords', )}),
             )
         else:
             self.fieldsets = (
                 (None, {'fields': ('title', 'url', )}),
                 (_('Advanced options'), {'fields': ('template_name', 'redirect_page', 'show_in_menu', 'is_public', )}),
-                (_('SEO'), {'fields': ('meta_description', )}),
+                (_('SEO'), {'fields': ('doc_title', 'meta_description', 'meta_keywords', )}),
             )
 
     def save_model(self, request, obj, form, change):
@@ -205,7 +228,11 @@ class FiberAdminPageAdmin(UserPermissionMixin, ModelAdmin):
 
 
 admin.site.register(ContentItem, ContentItemAdmin)
-admin.site.register(Image, ImageAdmin)
+
+if IMAGE_PREVIEW:
+    admin.site.register(Image, ImageAdminWithPreview)
+else:
+    admin.site.register(Image, ImageAdmin)
 admin.site.register(File, FileAdmin)
 admin.site.register(Page, PageAdmin)
 
