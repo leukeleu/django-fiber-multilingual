@@ -8,10 +8,10 @@ from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework import views
 from rest_framework import status
-from rest_framework import permissions
 
 from fiber.models import Page, PageContentItem, ContentItem, File, Image
 from fiber.app_settings import API_RENDER_HTML, PERMISSION_CLASS
+from fiber.rest_api.permission import RestApiPermission
 from fiber.utils import class_loader
 
 from .serializers import PageSerializer, MovePageSerializer, PageContentItemSerializer, MovePageContentItemSerializer, ContentItemSerializer, FileSerializer, ImageSerializer, FiberPaginationSerializer
@@ -67,20 +67,20 @@ class PageList(FiberListCreateAPIView):
     model = Page
     serializer_class = PageSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
 
 class PageDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Page
     serializer_class = PageSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
 
 class MovePageView(views.APIView):
     serializer_class = MovePageSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
     def get(self, request, pk, format=None):
         if not PERMISSIONS.can_move_page(request.user, Page.objects.get(id=pk)):
@@ -101,20 +101,20 @@ class PageContentItemList(FiberListCreateAPIView):
     model = PageContentItem
     serializer_class = PageContentItemSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
 
 class PageContentItemDetail(generics.RetrieveUpdateDestroyAPIView):
     model = PageContentItem
     serializer_class = PageContentItemSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
 
 class MovePageContentItemView(views.APIView):
     serializer_class = MovePageContentItemSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
     def get(self, request, pk, format=None):
         if not PERMISSIONS.can_edit(request.user, Page.objects.get(page_content_items__id=pk)):
@@ -135,21 +135,21 @@ class ContentItemList(FiberListCreateAPIView):
     model = ContentItem
     serializer_class = ContentItemSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
 
 class ContentItemDetail(generics.RetrieveUpdateDestroyAPIView):
     model = ContentItem
     serializer_class = ContentItemSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
 
 class FileList(IEUploadFixMixin, FiberListCreateAPIView):
     model = File
     serializer_class = FileSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
     pagination_serializer_class = FiberPaginationSerializer
     paginate_by = 5
@@ -185,14 +185,14 @@ class FileDetail(generics.RetrieveUpdateDestroyAPIView):
     model = File
     serializer_class = FileSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
 
 class ImageList(IEUploadFixMixin, FiberListCreateAPIView):
     model = Image
     serializer_class = ImageSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
     pagination_serializer_class = FiberPaginationSerializer
     paginate_by = 5
     orderable_fields = ('filename', 'size', 'updated')
@@ -228,12 +228,12 @@ class ImageDetail(generics.RetrieveUpdateDestroyAPIView):
     model = Image
     serializer_class = ImageSerializer
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
 
 @api_view(('GET',))
 @renderer_classes(API_RENDERERS)
-@permission_classes((permissions.IsAdminUser, ))
+@permission_classes((RestApiPermission, ))
 def api_root(request, format='None'):
     """
     This is the entry point for the API.
@@ -250,7 +250,7 @@ def api_root(request, format='None'):
 
 class PageTree(views.APIView):
     renderer_classes = API_RENDERERS
-    permission_classes = (permissions.IsAdminUser,)
+    permission_classes = (RestApiPermission,)
 
     def get(self, request, format=None):
         """
