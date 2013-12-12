@@ -3,7 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from mptt.forms import TreeNodeChoiceField
 
-from multilingual.forms.forms import MultilingualModelForm
+from hvad.forms import TranslatableModelForm
 
 from .editor import get_editor_field_name
 
@@ -12,7 +12,7 @@ from .models import Page, ContentItem
 from fiber.utils.urls import is_quoted_url
 
 
-class ContentItemAdminForm(MultilingualModelForm):
+class ContentItemAdminForm(TranslatableModelForm):
 
     class Meta:
         model = ContentItem
@@ -26,10 +26,11 @@ class ContentItemAdminForm(MultilingualModelForm):
             self.fields['template_name'] = forms.ChoiceField(choices=CONTENT_TEMPLATE_CHOICES, required=False, label=_('Content template'))
 
 
-class PageForm(MultilingualModelForm):
+class PageForm(TranslatableModelForm):
 
     meta_description = forms.CharField(widget=forms.Textarea, required=False)
-    parent = TreeNodeChoiceField(queryset=Page.tree.all(), level_indicator=3 * unichr(160), empty_label='---------', required=False)
+    parent = TreeNodeChoiceField(queryset=Page.objects.all(), level_indicator=3 * unichr(160), empty_label='---------', required=False)
+    meta_keywords = forms.CharField(widget=forms.Textarea, required=False)
     redirect_page = TreeNodeChoiceField(label=_('Redirect page'), queryset=Page.objects.filter(redirect_page__isnull=True), level_indicator=3 * unichr(160), empty_label='---------', required=False)
 
     class Meta:

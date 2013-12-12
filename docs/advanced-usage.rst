@@ -32,9 +32,15 @@ These settings are optional (default values are shown):
     FIBER_METADATA_PAGE_SCHEMA = {}
     FIBER_METADATA_CONTENT_SCHEMA = {}
 
+    FIBER_AUTO_CREATE_CONTENT_ITEMS = False
+
     COMPRESS = [the opposite of DEBUG]
 
     API_RENDER_HTML = False  # If set to True, you must include 'djangorestframework' in INSTALLED_APPS as well
+
+    FIBER_IMAGE_PREVIEW = True  # If set to False, you don't need 'easy_thumbnails' in INSTALLED_APPS
+    FIBER_LIST_THUMBNAIL_OPTIONS = {'size': (111, 111)}
+    FIBER_DETAIL_THUMBNAIL_OPTIONS = {'size': (228, 228)}
 
 
 Set or override fiber_page in the view

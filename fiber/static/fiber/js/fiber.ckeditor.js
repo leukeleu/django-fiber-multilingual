@@ -2,6 +2,11 @@
 
 Fiber.enhance_textarea = function(textarea, auto_height) {
 
+	if (! CKEDITOR || ! CKEDITOR.replace) {
+		// ckeditor not installed
+		return;
+	}
+
 	if (window.CKEDITOR_CONFIG_STYLES_SET) {
 		if (!CKEDITOR.stylesSet.get('config_styles_set')) {
 			CKEDITOR.stylesSet.add('config_styles_set', window.CKEDITOR_CONFIG_STYLES_SET);
@@ -24,9 +29,12 @@ Fiber.enhance_textarea = function(textarea, auto_height) {
 		CKEDITOR.config.height = window.innerHeight - (($('.ui-dialog').height() - $(textarea).height()) + 140);
 	}
 
+	var fiber_data = get_fiber_data();
+	language_code = fiber_data.language_code;
+
 	CKEDITOR.replace(textarea, {
 		skin: 'kama',
-		language: LANGUAGE_CODE,
+		language: language_code,
 		extraPlugins: 'fpagelink,ffilelink,fimagelink,fcustomlink,funlink,fimage,ftable,tabletools',
 		removePlugins: 'scayt,menubutton,forms,image,link',
 		toolbar: window.CKEDITOR_CONFIG_TOOLBAR,
@@ -39,12 +47,16 @@ Fiber.enhance_textarea = function(textarea, auto_height) {
 };
 
 Fiber.remove_textarea = function(textarea) {
-	if (textarea.id in CKEDITOR.instances) {
+	if (CKEDITOR.instances && textarea.id in CKEDITOR.instances) {
 		CKEDITOR.instances[textarea.id].destroy(false);
 	}
 };
 
 function extend_CKEditor() {
+
+	if (! CKEDITOR || ! CKEDITOR.plugins) {
+		return;
+	}
 
 	// fPageLink
 	var fpagelinkCmd = {
@@ -82,7 +94,7 @@ function extend_CKEditor() {
 			editor.ui.addButton('fPageLink', {
 				label: gettext('Link to a Page in This Site'),
 				command: 'fpagelink',
-				icon: STATIC_URL + 'fiber/images/ckeditor/icon-pagelink.png'
+				icon: get_static_url() + 'fiber/images/ckeditor/icon-pagelink.png'
 			});
 		}
 	});
@@ -126,7 +138,7 @@ function extend_CKEditor() {
 			editor.ui.addButton('fFileLink', {
 				label: gettext('Link to a File in This Site'),
 				command: 'ffilelink',
-				icon: STATIC_URL + 'fiber/images/ckeditor/icon-filelink.png'
+				icon: get_static_url() + 'fiber/images/ckeditor/icon-filelink.png'
 			});
 		}
 	});
@@ -170,7 +182,7 @@ function extend_CKEditor() {
 			editor.ui.addButton('fImageLink', {
 				label: gettext('Link to an Image in This Site'),
 				command: 'fimagelink',
-				icon: STATIC_URL + 'fiber/images/ckeditor/icon-imagelink.png'
+				icon: get_static_url() + 'fiber/images/ckeditor/icon-imagelink.png'
 			});
 		}
 	});
@@ -207,7 +219,7 @@ function extend_CKEditor() {
 			editor.ui.addButton('fCustomLink', {
 				label: gettext('Custom Link'),
 				command: 'fcustomlink',
-				icon: STATIC_URL + 'fiber/images/ckeditor/icon-customlink.png'
+				icon: get_static_url() + 'fiber/images/ckeditor/icon-customlink.png'
 			});
 		}
 	});
@@ -228,7 +240,7 @@ function extend_CKEditor() {
 			editor.ui.addButton('fUnlink', {
 				label: gettext('Unlink'),
 				command: 'funlink',
-				icon: STATIC_URL + 'fiber/images/ckeditor/icon-unlink.png'
+				icon: get_static_url() + 'fiber/images/ckeditor/icon-unlink.png'
 			});
 		}
 	});
@@ -262,7 +274,7 @@ function extend_CKEditor() {
 			editor.ui.addButton('fImage', {
 				label: gettext('Image'),
 				command: 'fimage',
-				icon: STATIC_URL + 'fiber/images/ckeditor/icon-image.png'
+				icon: get_static_url() + 'fiber/images/ckeditor/icon-image.png'
 			});
 		}
 	});
@@ -301,10 +313,24 @@ function extend_CKEditor() {
 			editor.ui.addButton('fTable', {
 				label: gettext('Table'),
 				command: 'ftable',
-				icon: STATIC_URL + 'fiber/images/ckeditor/icon-table.png'
+				icon: get_static_url() + 'fiber/images/ckeditor/icon-table.png'
 			});
 		}
 	});
+}
+
+function get_fiber_data() {
+	return $.parseJSON($('body').dataset('fiber-data'));
+}
+
+var static_url = null;
+
+function get_static_url() {
+	if (! static_url) {
+		static_url = get_fiber_data().static_url;
+	}
+
+	return static_url;
 }
 
 extend_CKEditor();

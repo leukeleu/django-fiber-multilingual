@@ -17,14 +17,12 @@ setup(
     license='Apache License, Version 2.0',
 
     install_requires=[
-        'Pillow==2.0.0',
-        'django-mptt==0.5.5',
-        'django-compressor==1.3',
-        'djangorestframework==2.3.6',
-        'django-multilingual-ds9==0.3.0.7',
-    ],
-    dependency_links=[
-        'https://github.com/leukeleu/django-multilingual-ds9/tarball/0.3.0.7#egg=django-multilingual-ds9-0.3.0.7',
+        'Pillow',
+        'django-hvad',
+        'django-mptt',
+        'django_compressor',
+        'djangorestframework',
+        'easy-thumbnails',
     ],
 
     description='Django Fiber - a simple, user-friendly CMS for all your Django projects',

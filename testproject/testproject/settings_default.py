@@ -35,7 +35,13 @@ TIME_ZONE = 'America/Chicago'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = (
+    ('en', 'English'),
+    ('fr', 'French'),
+    ('nl', 'Dutch'),
+)
 
 SITE_ID = 1
 
@@ -113,9 +119,17 @@ TEMPLATE_CONTEXT_PROCESSORS = DEFAULT_SETTINGS.TEMPLATE_CONTEXT_PROCESSORS + (
 )
 
 INSTALLED_APPS = (
+    'fiber',
+    'fiber_test',
+
+    # third party
+    'hvad',
     'mptt',
     'compressor',
-    'fiber',
+    'easy_thumbnails',
+    'south',
+
+    # django
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -124,19 +138,3 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
 )
-
-try:
-    import django_jenkins
-    installed_apps = list(INSTALLED_APPS)
-    installed_apps.append('django_jenkins')
-    INSTALLED_APPS = tuple(installed_apps)
-except ImportError:
-    pass
-
-JENKINS_TASKS = (
-    'django_jenkins.tasks.with_coverage',
-    'django_jenkins.tasks.django_tests',
-)
-
-# Only run tests for fiber app
-PROJECT_APPS = ['fiber']
