@@ -6,6 +6,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.template import loader, RequestContext
 from django.utils.encoding import smart_unicode
+from django.utils import translation
 
 from .app_settings import LOGIN_STRING, EXCLUDE_URLS, EDITOR
 from .models import ContentItem, Page
@@ -52,7 +53,12 @@ class AdminPageMiddleware(object):
 
             return HttpResponseRedirect('%s%s' % (url_without_fiber, querystring))
         else:
-            fiber_data = {}
+            fiber_data = dict(
+                backend_base_url=reverse('admin:index'),
+                language_code=translation.get_language(),
+                page_data=Page.objects.create_jqtree_data(request.user),
+                content_items=ContentItem.objects.get_content_groups(request.user),
+            )
 
             is_login = self.show_login(request, response)
             if is_login or self.show_admin(request, response):
@@ -68,12 +74,6 @@ class AdminPageMiddleware(object):
                         t = loader.get_template('fiber/admin.html')
                         c = RequestContext(request, {
                             'logout_url': self.get_logout_url(request),
-                            'pages_json': json.dumps(
-                                Page.objects.create_jqtree_data(request.user)
-                            ),
-                            'content_items_json': json.dumps(
-                                ContentItem.objects.get_content_groups(request.user)
-                            )
                         })
 
                         # Inject admin html in body.
@@ -174,8 +174,6 @@ class AdminPageMiddleware(object):
             {
                 'editor_template_js': self.editor_settings.get('template_js'),
                 'editor_template_css': self.editor_settings.get('template_css'),
-                'BACKEND_BASE_URL': reverse('admin:index'),
-                'FIBER_LOGIN_URL': reverse('fiber_login'),
             },
         )
         return t.render(c)

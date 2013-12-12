@@ -392,7 +392,7 @@ var AdminForm = Class.extend({
 var LoginFormDialog = AdminFormDialog.extend({
 
 	defaults: {
-		url: BACKEND_BASE_URL,
+		url: null,
 		width: 250,
 		height: 'auto',
 		start_width: 250
@@ -1475,7 +1475,7 @@ var adminPage = {
 		}
 
 		this.admin_page_tree.tree({
-			data: window.fiber_page_data,
+			data: this.body_fiber_data.page_data,
 			autoOpen: 0,
 			saveState: 'fiber_pages',
 			dragAndDrop: true,
@@ -1494,7 +1494,7 @@ var adminPage = {
 
 	init_content_tree: function() {
 		this.admin_content_tree.tree({
-			data: window.fiber_content_items_data,
+			data: this.body_fiber_data.content_items,
 			saveState: 'fiber_content_items'
 		});
 		this.admin_content_tree.bind('tree.contextmenu', $.proxy(this.handle_content_item_menu_context_menu, this));
@@ -2274,7 +2274,9 @@ $(window).ready(function() {
 
 	if (body_fiber_data.show_login) {
 		$('body').addClass('df-admin');
-		new LoginFormDialog();
+		new LoginFormDialog({
+			url: body_fiber_data.backend_base_url
+		});
 	}
 });
 
