@@ -32,7 +32,6 @@ setup(
     author_email='dbunskoek@leukeleu.nl',
 
     url='https://github.com/leukeleu/django-fiber-multilingual',
-    download_url='https://github.com/leukeleu/django-fiber-multilingual/tarball/multilingual_2',
 
     packages=find_packages(),
     include_package_data=True,
