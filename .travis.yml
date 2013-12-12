@@ -3,8 +3,8 @@ python:
   - 2.6
   - 2.7
 env:
-  - DJANGO_VERSION=1.4.8
-  - DJANGO_VERSION=1.5.4
+  - DJANGO_VERSION=1.5.5
+  - DJANGO_VERSION=1.6
 install:
   - pip install Django==$DJANGO_VERSION
   - "pip install . --use-mirrors"
@@ -19,4 +19,4 @@ after_success:
   - coveralls
 branches:
   only:
-    - django1.6
+    - multilingual
