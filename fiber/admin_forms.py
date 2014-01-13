@@ -16,6 +16,7 @@ class ContentItemAdminForm(TranslatableModelForm):
 
     class Meta:
         model = ContentItem
+        exclude = ()
 
         # Hack for multilingual: redefine fields here
         fields = ['name', get_editor_field_name('content_html'), 'template_name', 'protected', 'metadata', 'must_translate']
@@ -35,6 +36,7 @@ class PageForm(TranslatableModelForm):
 
     class Meta:
         model = Page
+        exclude = ()
 
     def __init__(self, *args, **kwargs):
         super(PageForm, self).__init__(*args, **kwargs)
