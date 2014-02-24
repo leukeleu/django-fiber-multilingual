@@ -323,8 +323,8 @@ class Image(models.Model):
         super(Image, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        self.image.storage.delete(self.image.name)
         super(Image, self).delete(*args, **kwargs)
+        self.image.storage.delete(self.image.name)
 
     def get_image_information(self):
         self.width, self.height = get_image_dimensions(self.image) or (0, 0)
@@ -345,9 +345,11 @@ class Image(models.Model):
     def preview(self):
         thumbnail = get_thumbnail(self.image, thumbnail_options=LIST_THUMBNAIL_OPTIONS)
         if thumbnail:
-            return u'<img src="{0}" width="{1}" height="{2}" />'.format(thumbnail.url, thumbnail.width, thumbnail.height)
-        else:
-            return _('Not available')
+            try:
+                return u'<img src="{0}" width="{1}" height="{2}" />'.format(thumbnail.url, thumbnail.width, thumbnail.height)
+            except IOError:
+                # original image file is missing
+                return _('Image file is missing')
     preview.short_description = _('Preview')
     preview.allow_tags = True
 
@@ -375,8 +377,8 @@ class File(models.Model):
         super(File, self).save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        self.file.storage.delete(self.file.name)
         super(File, self).delete(*args, **kwargs)
+        self.file.storage.delete(self.file.name)
 
     def get_filename(self):
         return os.path.basename(self.file.name)

@@ -1,5 +1,53 @@
 # Changelog
 
+## 0.12.2
+
+**Date** 18th Feb 2014
+
+* Fixed object style selection in new CKEditor
+* Allow classes and styles on a and img elements
+
+
+## 0.12.1
+
+**Date** 13th Feb 2014
+
+* Quick fix - don’t let the new CKEditor strip out a and img tags
+
+
+## 0.12
+
+**Date** 13th Feb 2014
+
+* (re)allow embedding of media using iframes, objects (with params and embed)
+* Fixed 500 error that occurred when adding a Fiber Image without providing a title
+* Return an informative text instead of raising 500 errors when image files are missing
+
+
+## 0.11.4
+
+**Date** 11th Feb 2014
+
+* Fixed issue with non-workinbg CKEditor when no stylesSet is defined
+
+
+## 0.11.3
+
+**Date** 11th Feb 2014
+
+* Upgraded CKEditor to 4.3.2
+* Correctly reverse admin urls instead of relying on relative paths
+
+
+## 0.11.2
+
+**Date** 29th Jan 2014
+
+* Added fix for issue with protected ForeignKey relations
+* Added sitemap.xml support
+* Added missing image and fixed image paths
+
+
 ## 0.11.1
 
 **Date** 14th Oct 2013
