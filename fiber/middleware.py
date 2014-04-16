@@ -14,6 +14,7 @@ from .models import ContentItem, Page
 from .utils.import_util import import_element
 from .utils.class_loader import load_class
 from .app_settings import PERMISSION_CLASS
+from .templatetags.fiber_tags import escape_json_for_html
 
 
 def is_non_html(response):
@@ -95,7 +96,7 @@ class AdminPageMiddleware(object):
                 response.content = self.body_re.sub(
                     r"<head>\g<IN_HEAD>%s</head>\g<AFTER_HEAD><body data-fiber-data='%s'\g<IN_BODY_TAG>>\g<BODY_CONTENTS></body>" % (
                         self.get_header_html(request),
-                        json.dumps(fiber_data),
+                        escape_json_for_html(json.dumps(fiber_data)),
                     ),
                     smart_unicode(response.content)
                 )
