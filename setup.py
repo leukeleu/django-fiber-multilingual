@@ -17,10 +17,10 @@ setup(
     license='Apache License, Version 2.0',
 
     install_requires=[
-        'Pillow==2.0.0',
-        'django-mptt==0.5.5',
-        'django-compressor==1.3',
-        'djangorestframework==2.3.6',
+        'Pillow',
+        'django-mptt',
+        'django-compressor',
+        'djangorestframework',
         'django-multilingual-ds9==0.3.0.7',
     ],
     dependency_links=[
@@ -34,7 +34,6 @@ setup(
     author_email='dbunskoek@leukeleu.nl',
 
     url='https://github.com/leukeleu/django-fiber-multilingual',
-    download_url='https://github.com/leukeleu/django-fiber-multilingual/tarball/multilingual_2',
 
     packages=find_packages(),
     include_package_data=True,
