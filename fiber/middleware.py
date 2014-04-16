@@ -7,6 +7,7 @@ from django.http import HttpResponseRedirect
 from django.template import loader, RequestContext
 from django.utils.encoding import smart_unicode
 from django.utils import translation
+from django.conf import settings
 
 from .app_settings import LOGIN_STRING, EXCLUDE_URLS, EDITOR
 from .models import ContentItem, Page
@@ -58,6 +59,7 @@ class AdminPageMiddleware(object):
                 language_code=translation.get_language(),
                 page_data=Page.objects.create_jqtree_data(request.user),
                 content_items=ContentItem.objects.get_content_groups(request.user),
+                static_url=settings.STATIC_URL,
             )
 
             is_login = self.show_login(request, response)
