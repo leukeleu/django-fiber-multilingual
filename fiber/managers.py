@@ -214,7 +214,7 @@ class PageManager(TranslationManager):
 
         for page in queryset:
             page_info = dict(
-                label=page.title,
+                label=unicode(page),
                 id=page.id,
                 editable=page in editables_queryset
             )
