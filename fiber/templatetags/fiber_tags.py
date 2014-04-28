@@ -1,6 +1,8 @@
 import operator, json
 
 from django import template
+from django.core.cache import cache
+from django.template.loader import render_to_string
 
 from fiber import __version__ as fiber_version_number
 from fiber.models import Page, ContentItem
@@ -12,6 +14,8 @@ from fiber.utils import class_loader
 PERMISSIONS = class_loader.load_class(PERMISSION_CLASS)
 
 register = template.Library()
+
+CACHE_TIMEOUT = 60 * 60
 
 
 def show_menu(context, menu_name, min_level, max_level, expand=None):
@@ -117,18 +121,37 @@ register.inclusion_tag('fiber/menu.html', takes_context=True)(show_menu)
 
 
 def show_content(context, content_item_name):
-    content_item = None
-    try:
-        content_item = ContentItem.objects.get(name__exact=content_item_name)
-    except ContentItem.DoesNotExist:
-        if AUTO_CREATE_CONTENT_ITEMS:
-            content_item = ContentItem.objects.create(name=content_item_name)
+    def get_content_item():
+        try:
+            return ContentItem.objects.get(name__exact=content_item_name)
+        except ContentItem.DoesNotExist:
+            if AUTO_CREATE_CONTENT_ITEMS:
+                return ContentItem.objects.create(name=content_item_name)
+            else:
+                return None
 
-    context['content_item'] = content_item
+    def is_staff():
+        user = context.get('user', None)
 
-    return context
+        return user and user.is_staff
 
-register.inclusion_tag('fiber/content_item.html', takes_context=True)(show_content)
+    def render():
+        return render_to_string('fiber/content_item.html', dict(content_item=get_content_item()), context)
+
+    if is_staff():
+        return render()
+    else:
+        cache_key = 'fiber_content_item_%s_%s' % (content_item_name, context['request'].LANGUAGE_CODE)
+
+        html = cache.get(cache_key)
+
+        if html == None:
+            html = render()
+            cache.set(cache_key, html, timeout=CACHE_TIMEOUT)
+
+        return html
+
+register.simple_tag(takes_context=True)(show_content)
 
 
 @register.tag(name='show_page_content')
