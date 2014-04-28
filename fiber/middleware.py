@@ -55,16 +55,16 @@ class AdminPageMiddleware(object):
 
             return HttpResponseRedirect('%s%s' % (url_without_fiber, querystring))
         else:
-            fiber_data = dict(
-                backend_base_url=reverse('admin:index'),
-                language_code=translation.get_language(),
-                page_data=Page.objects.create_jqtree_data(request.user),
-                content_items=ContentItem.objects.get_content_groups(request.user),
-                static_url=settings.STATIC_URL,
-            )
-
             is_login = self.show_login(request, response)
             if is_login or self.show_admin(request, response):
+                fiber_data = dict(
+                    backend_base_url=reverse('admin:index'),
+                    language_code=translation.get_language(),
+                    page_data=Page.objects.create_jqtree_data(request.user),
+                    content_items=ContentItem.objects.get_content_groups(request.user),
+                    static_url=settings.STATIC_URL,
+                )
+
                 if is_login:
                     # Only show the login window once
                     request.session['show_fiber_admin'] = False
