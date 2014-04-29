@@ -141,7 +141,8 @@ def show_content(context, content_item_name):
     if is_staff():
         return render()
     else:
-        cache_key = 'fiber_content_item_%s_%s' % (content_item_name, context['request'].LANGUAGE_CODE)
+        language_code = getattr(context['request'], 'LANGUAGE_CODE', 'en')
+        cache_key = 'fiber_content_item_%s_%s' % (content_item_name, language_code)
 
         html = cache.get(cache_key)
 
