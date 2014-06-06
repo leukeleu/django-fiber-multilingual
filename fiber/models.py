@@ -112,8 +112,8 @@ class Page(TranslatableModel):
         meta=dict(db_table='fiber_pagetranslation')
     )
 
-    tree = TreeManager()
     objects = load_class(PAGE_MANAGER)
+    tree = TreeManager()
 
     class Meta:
         verbose_name = _('page')
