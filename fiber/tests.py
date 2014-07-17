@@ -65,23 +65,23 @@ class ContentItemTest(TestCase):
 
         content_groups = ContentItem.objects.get_content_groups()
 
-        self.assertEquals(
+        self.assertEqual(
             format_list([g['label'] for g in content_groups], must_sort=False, separator=';'),
             'used more than once;unused;used once;recently changed'
         )
-        self.assertEquals(
+        self.assertEqual(
             format_list(n['label'] for n in content_groups[0]['children']),
             'a'
         )
-        self.assertEquals(
+        self.assertEqual(
             format_list(n['label'] for n in content_groups[1]['children']),
             'c'
         )
-        self.assertEquals(
+        self.assertEqual(
             format_list(n['label'] for n in content_groups[2]['children']),
             'b'
         )
-        self.assertEquals(
+        self.assertEqual(
             format_list(n['label'] for n in content_groups[3]['children']),
             'a b c'
         )
@@ -89,7 +89,7 @@ class ContentItemTest(TestCase):
     def test_rename_url(self):
 
         def check_content(name, html):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(
                     ContentItem.objects.get(name=name).content_html
                 ),
@@ -168,18 +168,18 @@ class PageTest(TestCase):
         page_abc.move_page(page_section2.id, 'inside')
 
         page_abc = Page.objects.get(title='abc')  # reload the page
-        self.assertEquals(page_abc.parent.title, 'section2')
-        self.assertEquals(page_abc.get_previous_sibling(), None)
-        self.assertEquals(page_abc.get_next_sibling().title, 'def')
+        self.assertEqual(page_abc.parent.title, 'section2')
+        self.assertEqual(page_abc.get_previous_sibling(), None)
+        self.assertEqual(page_abc.get_next_sibling().title, 'def')
 
         # references in content items are changed
-        self.assertEquals(
+        self.assertEqual(
             condense_html_whitespace(
                 ContentItem.objects.get(name='a').content_html
             ),
             '<p><a href="/section2/abc/">abc</a></p>'
         )
-        self.assertEquals(
+        self.assertEqual(
             condense_html_whitespace(
                 ContentItem.objects.get(name='b').content_html
             ),
@@ -194,14 +194,14 @@ class PageTest(TestCase):
         page_xyz.move_page(page_def.id, 'after')
 
         page_xyz = Page.objects.get(title='xyz')  # reload the page
-        self.assertEquals(page_xyz.parent.title, 'section2')
-        self.assertEquals(page_xyz.get_previous_sibling().title, 'def')
-        self.assertEquals(page_xyz.get_next_sibling().title, 'ghi')
+        self.assertEqual(page_xyz.parent.title, 'section2')
+        self.assertEqual(page_xyz.get_previous_sibling().title, 'def')
+        self.assertEqual(page_xyz.get_next_sibling().title, 'ghi')
 
     def test_get_absolute_url(self):
 
         def test_url(title, url):
-            self.assertEquals(
+            self.assertEqual(
                 Page.objects.get(title=title).get_absolute_url(),
                 url
             )
@@ -237,13 +237,13 @@ class PageTest(TestCase):
         page_abc.save()
 
         # references in content items are changed
-        self.assertEquals(
+        self.assertEqual(
             condense_html_whitespace(
                 ContentItem.objects.get(name='a').content_html
             ),
             '<p><a href="/section1/a_b_c/">abc</a></p>'
         )
-        self.assertEquals(
+        self.assertEqual(
             condense_html_whitespace(
                 ContentItem.objects.get(name='b').content_html
             ),
@@ -313,33 +313,33 @@ class PageContentItemTest(TestCase):
         item_c = PageContentItem.objects.create(page=page, content_item=content_c, block_name='main', sort=2)
 
         # 1. get content
-        self.assertEquals(u'a b c', get_content(page.id))
+        self.assertEqual(u'a b c', get_content(page.id))
 
         # 2. move 'a' before 'c'
         item_a.move(item_c.id)
 
-        self.assertEquals(u'b a c', get_content(page.id))
+        self.assertEqual(u'b a c', get_content(page.id))
 
         # 3. move 'c' before 'a'
         item_c.move(item_a.id)
-        self.assertEquals(u'b c a', get_content(page.id))
+        self.assertEqual(u'b c a', get_content(page.id))
 
         # 4. move 'b' last
         item_b.move()
-        self.assertEquals(u'c a b', get_content(page.id))
+        self.assertEqual(u'c a b', get_content(page.id))
 
         # 5. move 'a' to block 'side'
         item_a.move(block_name='side')
-        self.assertEquals(u'c b', get_content(page.id, 'main'))
-        self.assertEquals(u'a', get_content(page.id, 'side'))
+        self.assertEqual(u'c b', get_content(page.id, 'main'))
+        self.assertEqual(u'a', get_content(page.id, 'side'))
 
         # 6. move 'c' before 'a' in block 'side'
         item_a = PageContentItem.objects.get(id=item_a.id)
         item_c = PageContentItem.objects.get(id=item_c.id)
 
         item_c.move(item_a.id, block_name='side')
-        self.assertEquals(u'b', get_content(page.id, 'main'))
-        self.assertEquals(u'c a', get_content(page.id, 'side'))
+        self.assertEqual(u'b', get_content(page.id, 'main'))
+        self.assertEqual(u'c a', get_content(page.id, 'side'))
 
 
 class TestTemplateTags(TestCase):
@@ -378,7 +378,7 @@ class TestTemplateTags(TestCase):
             'fiber_page': Page.objects.get_by_url('/'),
         })
         with self.assertNumQueries(2):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="home first last">'
@@ -420,7 +420,7 @@ class TestTemplateTags(TestCase):
         })
 
         with self.assertNumQueries(2):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
@@ -445,7 +445,7 @@ class TestTemplateTags(TestCase):
         })
 
         with self.assertNumQueries(2):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
@@ -470,7 +470,7 @@ class TestTemplateTags(TestCase):
             'fiber_page': Page.objects.get_by_url('/section1/sub1/'),
         })
         with self.assertNumQueries(2):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
@@ -488,7 +488,7 @@ class TestTemplateTags(TestCase):
         )
 
         with self.assertNumQueries(2):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="sub1 first">'
@@ -516,7 +516,7 @@ class TestTemplateTags(TestCase):
             'fiber_page': other_root,
         })
         with self.assertNumQueries(2):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                  '<li class="home first last">'
@@ -537,7 +537,7 @@ class TestTemplateTags(TestCase):
         })
 
         with self.assertNumQueries(2):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": 1 }\'>'
                    '<li class="home first last">'
@@ -591,7 +591,7 @@ class TestTemplateTags(TestCase):
             'second_page': p2
         })
 
-        self.assertEquals(
+        self.assertEqual(
             condense_html_whitespace(t.render(c)),
             ('<div><div class="content"><p>c2</p></div></div><div><div class="content"><p>c1</p></div></div>'))
 
@@ -624,11 +624,11 @@ class TestUtilsURLValidator(TestCase):
             self.validator('"some_named_url"')
 
         # Named url does exist
-        self.assertEquals(self.validator('"another_named_url"'), None)
+        self.assertEqual(self.validator('"another_named_url"'), None)
 
         # A fiber page also uses that named_url
         Page.objects.create(title='some_page', url='"another_named_url"').save()
-        self.assertEquals(self.validator('"another_named_url"'), None)
+        self.assertEqual(self.validator('"another_named_url"'), None)
 
 
 class TestFiberPageMixin(TestCase):
