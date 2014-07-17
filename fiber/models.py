@@ -5,6 +5,7 @@ import warnings
 from django.core.urlresolvers import reverse
 from django.core.files.images import get_image_dimensions
 from django.db import models
+from django.utils.encoding import python_2_unicode_compatible
 from django.utils.html import strip_tags
 from django.utils.translation import ugettext, get_language
 from django.utils.translation import ugettext_lazy as _
@@ -25,6 +26,7 @@ from .utils.json import JSONField
 from .utils.urls import get_named_url_from_quoted_url, is_quoted_url
 
 
+@python_2_unicode_compatible
 class ContentItem(TranslatableModel):
     created = models.DateTimeField(_('created'), auto_now_add=True)
     updated = models.DateTimeField(_('updated'), auto_now=True)
@@ -47,7 +49,7 @@ class ContentItem(TranslatableModel):
         verbose_name = _('content item')
         verbose_name_plural = _('content items')
 
-    def __unicode__(self):
+    def __str__(self):
         if self.name:
             return self.name
         else:
@@ -86,6 +88,7 @@ class ContentItem(TranslatableModel):
         return json.dumps(self.used_on_pages_data)
 
 
+@python_2_unicode_compatible
 class Page(TranslatableModel):
     created = models.DateTimeField(_('created'), auto_now_add=True)
     updated = models.DateTimeField(_('updated'), auto_now=True)
@@ -120,7 +123,7 @@ class Page(TranslatableModel):
         verbose_name_plural = _('pages')
         ordering = ('tree_id', 'lft')
 
-    def __unicode__(self):
+    def __str__(self):
         return self.lazy_translation_getter('title')
 
     def save(self, *args, **kwargs):

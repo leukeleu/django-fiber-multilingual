@@ -18,7 +18,7 @@ def import_element(path):
 
     try:
         module = import_module(module_path)
-    except ImportError, e:
+    except ImportError as e:
         raise exceptions.ImproperlyConfigured('Error importing module %s: "%s"' % (module_path, e))
 
     try:
