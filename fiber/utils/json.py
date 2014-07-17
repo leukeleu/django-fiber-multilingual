@@ -35,7 +35,8 @@ class JSONFormField(forms.CharField):
             raise forms.ValidationError(u'JSON decode error: %s' % (unicode(exception), ))
 
 
-class JSONField(six.with_metaclass(models.SubfieldBase, models.TextField)):
+@six.add_metaclass(models.SubfieldBase)
+class JSONField(models.TextField):
     def __init__(self, *args, **kwargs):
         if 'schema' in kwargs:
             self.schema = kwargs.pop('schema')
@@ -85,6 +86,7 @@ class JSONField(six.with_metaclass(models.SubfieldBase, models.TextField)):
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
         return self._get_json_value(value)
+
 
 try:
     from south.modelsinspector import add_introspection_rules
