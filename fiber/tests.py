@@ -1,5 +1,7 @@
 import re
 
+import six
+
 from django.conf.urls import patterns, url
 from django.views.generic import View
 from django.contrib.auth.models import User
@@ -21,7 +23,7 @@ def format_list(l, must_sort=True, separator=' '):
     >>> format_list([3, 2, 1])
     u'1 2 3'
     """
-    titles = [unicode(v) for v in l]
+    titles = [six.text_type(v) for v in l]
     if must_sort:
         titles = sorted(titles)
 
@@ -249,7 +251,7 @@ class PageTest(TestCase):
         )
 
     def test_unicode(self):
-        self.assertEqual(unicode(Page(title='abc')), 'abc')
+        self.assertEqual(six.text_type(Page(title='abc')), 'abc')
 
     def test_is_first_child(self):
         # setup
@@ -666,16 +668,16 @@ class TestFiberPageMixin(TestCase):
 class TestContentItem(TestCase):
     def test_unicode(self):
         # with name
-        self.assertEqual(unicode(ContentItem(name='abc')), 'abc')
+        self.assertEqual(six.text_type(ContentItem(name='abc')), 'abc')
 
         # without name, no content
-        self.assertEqual(unicode(ContentItem()), '[ EMPTY ]')
+        self.assertEqual(six.text_type(ContentItem()), '[ EMPTY ]')
 
         # without name, content length < 50
-        self.assertEqual(unicode(ContentItem(content_html='xyz')), 'xyz')
+        self.assertEqual(six.text_type(ContentItem(content_html='xyz')), 'xyz')
 
         # without name, content length > 50
-        self.assertEqual(unicode(ContentItem(content_html='abcdefghij' * 6)), 'abcdefghijabcdefghijabcdefghijabcdefghijabcdefghij...')
+        self.assertEqual(six.text_type(ContentItem(content_html='abcdefghij' * 6)), 'abcdefghijabcdefghijabcdefghijabcdefghijabcdefghij...')
 
     def test_get_add_url(self):
         self.assertEqual(ContentItem.get_add_url(), '/admin/fiber/fiber_admin/fiber/contentitem/add/')

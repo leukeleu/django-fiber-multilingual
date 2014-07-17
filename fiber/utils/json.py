@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 import json
 
+import six
+
 from django import forms
 from django.db import models
 
@@ -29,15 +31,12 @@ class JSONFormField(forms.CharField):
             return None
         try:
             return json.loads(value)
-        except Exception, exception:
+        except Exception as exception:
             raise forms.ValidationError(u'JSON decode error: %s' % (unicode(exception), ))
 
 
-class JSONField(models.TextField):
-    __metaclass__ = models.SubfieldBase
-
+class JSONField(six.with_metaclass(models.SubfieldBase, models.TextField)):
     def __init__(self, *args, **kwargs):
-
         if 'schema' in kwargs:
             self.schema = kwargs.pop('schema')
         else:
@@ -59,7 +58,7 @@ class JSONField(models.TextField):
         if value is None:
             return None
         try:
-            if isinstance(value, basestring):
+            if isinstance(value, six.string_types):
                 return json.loads(value)
         except ValueError:
             pass
@@ -68,7 +67,7 @@ class JSONField(models.TextField):
     def _get_json_value(self, value):
         if value is None:
             return ''
-        elif isinstance(value, basestring):
+        elif isinstance(value, six.string_types):
             return value
         else:
             return json.dumps(value)

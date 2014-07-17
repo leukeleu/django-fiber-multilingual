@@ -7,7 +7,7 @@ def load_class(fqc, **kwds):
     try:
         mod_name, klass_name = fqc.rsplit('.', 1)
         mod = import_module(mod_name)
-    except ImportError, e:
+    except ImportError as e:
         raise ImproperlyConfigured(('Error importing module {0}: "{1}"'.format(mod_name, e)))
     try:
         klass = getattr(mod, klass_name)

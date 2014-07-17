@@ -50,7 +50,7 @@ class UserPermissionMixin(object):
 
 
 class FileAdmin(UserPermissionMixin, admin.ModelAdmin):
-    list_display = ('__unicode__', 'title', 'updated',)
+    list_display = ('__str__', 'title', 'updated',)
     date_hierarchy = 'updated'
     search_fields = ('title', )
     actions = ['really_delete_selected']
@@ -78,7 +78,7 @@ class FileAdmin(UserPermissionMixin, admin.ModelAdmin):
 
 
 class ImageAdmin(FileAdmin):
-    list_display = ('__unicode__', 'title', 'get_size', 'updated',)
+    list_display = ('__str__', 'title', 'get_size', 'updated',)
     fieldsets = (
         (None, {'fields': ('image', 'title',)}),
         (_('Size'), {'classes': ('collapse',), 'fields': ('width', 'height',)}),
@@ -86,7 +86,7 @@ class ImageAdmin(FileAdmin):
 
 
 class ImageAdminWithPreview(ImageAdmin):
-    list_display = ('preview', '__unicode__', 'title', 'get_size', 'updated',)
+    list_display = ('preview', '__str__', 'title', 'get_size', 'updated',)
 
     def formfield_for_dbfield(self, db_field, **kwargs):
         if db_field.name == 'image':
@@ -97,7 +97,7 @@ class ImageAdminWithPreview(ImageAdmin):
 
 
 class ContentItemAdmin(UserPermissionMixin, admin.ModelAdmin):
-    list_display = ('__unicode__', 'unused')
+    list_display = ('__str__', 'unused')
     form = forms.ContentItemAdminForm
     fieldsets = (
         (None, {'fields': ('name', get_editor_field_name('content_html'),)}),
@@ -171,7 +171,7 @@ class PageAdmin(UserPermissionMixin, MPTTModelAdmin):
 
 
 class FiberAdminContentItemAdmin(UserPermissionMixin, fiber_admin.ModelAdmin):
-    list_display = ('__unicode__',)
+    list_display = ('__str__',)
     form = forms.ContentItemAdminForm
 
     def __init__(self, *args, **kwargs):

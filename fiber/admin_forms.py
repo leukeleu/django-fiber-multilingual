@@ -1,3 +1,5 @@
+import six
+
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
@@ -20,11 +22,10 @@ class ContentItemAdminForm(forms.ModelForm):
 
 
 class PageForm(forms.ModelForm):
-
     meta_description = forms.CharField(widget=forms.Textarea, required=False)
     meta_keywords = forms.CharField(widget=forms.Textarea, required=False)
-    parent = TreeNodeChoiceField(queryset=Page.tree.all(), level_indicator=3 * unichr(160), empty_label='---------', required=False)
-    redirect_page = TreeNodeChoiceField(label=_('Redirect page'), queryset=Page.objects.filter(redirect_page__isnull=True), level_indicator=3 * unichr(160), empty_label='---------', required=False)
+    parent = TreeNodeChoiceField(queryset=Page.tree.all(), level_indicator=3 * six.unichr(160), empty_label='---------', required=False)
+    redirect_page = TreeNodeChoiceField(label=_('Redirect page'), queryset=Page.objects.filter(redirect_page__isnull=True), level_indicator=3 * six.unichr(160), empty_label='---------', required=False)
 
     class Meta:
         model = Page

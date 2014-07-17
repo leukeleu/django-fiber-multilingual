@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import os
 import sys
 from setuptools import setup, find_packages
@@ -6,9 +8,9 @@ version = __import__('fiber').__version__
 
 if sys.argv[-1] == 'publish':  # upload to pypi
     os.system("python setup.py register sdist upload")
-    print "You probably want to also tag the version now:"
-    print "  git tag -a %s -m 'version %s'" % (version, version)
-    print "  git push --tags"
+    print("You probably want to also tag the version now:")
+    print("  git tag -a %s -m 'version %s'" % (version, version))
+    print("  git push --tags")
     sys.exit()
 
 setup(
@@ -21,7 +23,8 @@ setup(
         'django-mptt>=0.6.0',
         'django_compressor>=1.3',
         'djangorestframework>=2.3.8',
-        'easy-thumbnails>=1.4',
+        'easy-thumbnails>=1.4,<=1.5',
+        'six>=1.7.3',
     ],
 
     description='Django Fiber - a simple, user-friendly CMS for all your Django projects',
