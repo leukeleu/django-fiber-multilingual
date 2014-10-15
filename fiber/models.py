@@ -87,6 +87,9 @@ class ContentItem(TranslatableModel):
 
         return json.dumps(self.used_on_pages_data)
 
+    def natural_key(self):
+        return self.name,
+
 
 @python_2_unicode_compatible
 class Page(TranslatableModel):
@@ -248,6 +251,9 @@ class Page(TranslatableModel):
             return True
         else:
             return False
+
+    def natural_key(self):
+        return self.url,
 
 
 mptt.register(Page)
