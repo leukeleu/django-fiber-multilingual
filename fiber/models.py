@@ -82,6 +82,9 @@ class ContentItem(MultilingualModel):
 
         return simplejson.dumps(self.used_on_pages_data)
 
+    def natural_key(self):
+        return self.name,
+
 
 class Page(MultilingualModel):
     created = models.DateTimeField(_('created'), auto_now_add=True)
@@ -237,6 +240,9 @@ class Page(MultilingualModel):
             return True
         else:
             return False
+
+    def natural_key(self):
+        return self.url,
 
 
 mptt.register(Page)

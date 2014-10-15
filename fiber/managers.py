@@ -116,6 +116,9 @@ class ContentItemManager(MultilingualManager):
                     content_item.content_html = html
                     content_item.save()
 
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
 
 class PageManager(MultilingualManager):
 
@@ -245,3 +248,6 @@ class PageManager(MultilingualManager):
 
             page_dict[page.id] = page_info
         return data
+
+    def get_by_natural_key(self, url):
+        return self.get(url=url)
