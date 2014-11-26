@@ -112,3 +112,6 @@ class FiberTests(TestCase):
 
         # get admin page for content item
         self.client.get('/admin/fiber/contentitem/%d/' % lorem_ipsum.id)
+
+        # get admin page for content item list
+        self.client.get('/admin/fiber/contentitem/')

@@ -105,7 +105,8 @@ class ContentItemAdmin(UserPermissionMixin, TranslatableAdmin):
         (_('Advanced options'), {'classes': ('collapse',), 'fields': ('template_name', 'protected', 'must_translate')}),
         (_('Metadata'), {'classes': ('collapse',), 'fields': ('metadata',)}),
     )
-    date_hierarchy = 'updated'
+    # date hiearchy causes error in hvad
+    #date_hierarchy = 'updated'
     search_fields = ('name', get_editor_field_name('content_html'))
 
     def unused(self, obj):
@@ -120,7 +121,7 @@ class PageContentItemInline(UserPermissionMixin, admin.TabularInline):
     extra = 1
 
 
-class PageAdmin(UserPermissionMixin, ModelAdmin):
+class PageAdmin(UserPermissionMixin, TranslatableAdmin):
 
     form = forms.PageForm
     fieldsets = (
