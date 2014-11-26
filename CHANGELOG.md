@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0
+
+**Date** 26th Nov 2014
+
+* Support Django 1.7
+
 ## 0.13
 
 **Date** 1st Apr 2014

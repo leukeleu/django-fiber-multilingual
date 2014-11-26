@@ -24,7 +24,7 @@ Convinced? Want to use Django Fiber in your own Django project? Then follow the 
 
 ## Installation
 
-We're assuming you are using Django 1.4, 1.5 or 1.6.
+We're assuming you are using Django 1.4-1.7.
 
     $ pip install django-fiber
 
@@ -93,7 +93,11 @@ These dependencies are automatically installed:
 
 ## Post-installation
 
-Create database tables:
+Create database tables for Django >= 1.7
+
+    $ python manage.py migrate
+
+Create database tables for Django < 1.7:
 
     $ python manage.py syncdb
 
