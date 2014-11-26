@@ -36,7 +36,11 @@ class ContentItemManager(TranslationManager):
 
         today = datetime.date.today()
 
-        queryset = self.get_queryset()
+        # This can be changed to queryset = self.get_queryset() when support for Django < 1.6 is dropped.
+        if hasattr(self, 'get_queryset'):
+            queryset = self.get_queryset()
+        else:
+            queryset = self.get_query_set()
 
         #  Filter queryset through the permissions class
         if user:
@@ -104,7 +108,13 @@ class ContentItemManager(TranslationManager):
                     content_item.content_markup,
                 )
 
-        for content_item in self.get_queryset():
+        # This can be changed to queryset = self.get_queryset() when support for Django < 1.6 is dropped.
+        if hasattr(self, 'get_queryset'):
+            queryset = self.get_queryset()
+        else:
+            queryset = self.get_query_set()
+
+        for content_item in queryset:
             if editor.renderer:
                 markup = rename_markup(content_item.content_markup)
 
@@ -149,11 +159,16 @@ class PageManager(TranslationManager):
         # We need to check against get_absolute_url(). Typically this will
         # recursively access .parent, so we retrieve the ancestors at the same time
         # for efficiency.
-        qs = self.get_queryset()
+
+        # This can be changed to queryset = self.get_queryset() when support for Django < 1.6 is dropped.
+        if hasattr(self, 'get_queryset'):
+            queryset = self.get_queryset()
+        else:
+            queryset = self.get_query_set()
 
         # First check if there is a Page whose `url` matches the requested URL.
         try:
-            return qs.get(url__exact=url)
+            return queryset.get(url__exact=url)
         except self.model.DoesNotExist:
             pass
 
@@ -166,13 +181,13 @@ class PageManager(TranslationManager):
 
         last_url_part = url.rstrip('/').rsplit('/', 1)[-1]
         if last_url_part:
-            page_candidates = qs.exclude(url__exact='', ).filter(url__icontains=last_url_part)
+            page_candidates = queryset.exclude(url__exact='', ).filter(url__icontains=last_url_part)
 
             # We need all the ancestors of all the candidates. We can do this in
             # two queries - one for candidates, one for ancestors:
             route_pages = self.model.objects.none()
             for p in page_candidates:
-                route_pages = route_pages | qs.filter(lft__lte=p.lft,
+                route_pages = route_pages | queryset.filter(lft__lte=p.lft,
                                                       rght__gte=p.rght)
             route_pages = self.link_parent_objects(route_pages)
             # Use page_candidates that have parent objects attached
@@ -184,7 +199,7 @@ class PageManager(TranslationManager):
 
         # If no Page has been found, try to find a Page by matching the
         # requested URL with reversed `named_url`s.
-        page_candidates = qs.filter(url__startswith='"', url__endswith='"')
+        page_candidates = queryset.filter(url__startswith='"', url__endswith='"')
         for page in page_candidates:
             if get_named_url_from_quoted_url(page.url) == url:
                 return page

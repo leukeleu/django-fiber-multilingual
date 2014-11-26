@@ -1,9 +1,9 @@
-coverage==3.7
+coverage==3.7.1
 django_compressor==1.4
-https://github.com/mbraak/django-hvad/archive/0.4.1.1.tar.gz#egg=django-hvad-0.4.1.1
+django-hvad==0.5.2
 django-mptt==0.6.1
 djangorestframework==2.3.14
 easy-thumbnails==1.5
 mock==1.0.1
 Pillow==2.5.1
-South==0.8.4
+South==1.0.1

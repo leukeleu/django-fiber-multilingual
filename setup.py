@@ -20,11 +20,11 @@ setup(
 
     install_requires=[
         'Pillow>=2.2.1',
-        'django-mptt>=0.6.0',
-        'django_compressor>=1.3',
+        'django-mptt>=0.6.1',
+        'django_compressor>=1.4',
         'djangorestframework>=2.3.8',
         'django-hvad',
-        'easy-thumbnails>=1.4,<=1.5',
+        'easy-thumbnails>=2.2',
         'six>=1.7.3',
     ],
 

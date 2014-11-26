@@ -1,4 +1,5 @@
 import re
+import json
 
 import six
 
@@ -727,8 +728,14 @@ class TestContentItem(TestCase):
         PageContentItem.objects.create(page=page1, content_item=content_item1)
 
         # - call get_used_on_pages_json
-        # NB. don't check the result because the key order can change in a dict
-        content_item1.get_used_on_pages_json()
+        self.assertEqual(
+            json.loads(
+                content_item1.get_used_on_pages_json()
+            ),
+            [
+                {"url": "/abc/", "title": "p1"}
+            ]
+        )
 
         # - load contentitem
         content_item1 = ContentItem.objects.get(id=content_item1.id)

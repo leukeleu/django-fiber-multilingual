@@ -130,7 +130,7 @@ class PageAdmin(UserPermissionMixin, ModelAdmin):
     )
 
     inlines = (PageContentItemInline,)
-    list_display = ('__unicode__', 'view_on_site', 'url', 'redirect_page', 'get_absolute_url', 'action_links')
+    list_display = ('__str__', 'view_on_site', 'url', 'redirect_page', 'get_absolute_url', 'action_links')
     list_per_page = 1000
     search_fields = ('title', 'url', 'redirect_page__title')
 
