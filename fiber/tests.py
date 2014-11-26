@@ -172,9 +172,9 @@ class PageTest(TestCase):
         page_abc.move_page(page_section2.id, 'inside')
 
         page_abc = Page.objects.language().get(title='abc')  # reload the page
-        self.assertEquals(page_abc.parent.title, 'section2')
-        self.assertEquals(page_abc.get_previous_sibling(), None)
-        self.assertEquals(page_abc.get_next_sibling().title, 'def')
+        self.assertEqual(page_abc.parent.title, 'section2')
+        self.assertEqual(page_abc.get_previous_sibling(), None)
+        self.assertEqual(page_abc.get_next_sibling().title, 'def')
 
         # references in content items are changed
         self.assertEqual(
@@ -198,14 +198,14 @@ class PageTest(TestCase):
         page_xyz.move_page(page_def.id, 'after')
 
         page_xyz = Page.objects.language().get(title='xyz')  # reload the page
-        self.assertEquals(page_xyz.parent.title, 'section2')
-        self.assertEquals(page_xyz.get_previous_sibling().title, 'def')
-        self.assertEquals(page_xyz.get_next_sibling().title, 'ghi')
+        self.assertEqual(page_xyz.parent.title, 'section2')
+        self.assertEqual(page_xyz.get_previous_sibling().title, 'def')
+        self.assertEqual(page_xyz.get_next_sibling().title, 'ghi')
 
     def test_get_absolute_url(self):
 
         def test_url(title, url):
-            self.assertEquals(
+            self.assertEqual(
                 Page.objects.language().get(title=title).get_absolute_url(),
                 url
             )
@@ -388,7 +388,7 @@ class TestTemplateTags(TestCase):
 
         # Number of queries increased from 2 to 7 because of multilingual.
         with self.assertNumQueries(7):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="home first last">'
@@ -431,7 +431,7 @@ class TestTemplateTags(TestCase):
 
         # Number of queries increased from 2 to 6 because of multilingual.
         with self.assertNumQueries(6):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
@@ -457,7 +457,7 @@ class TestTemplateTags(TestCase):
 
         # Number of queries increased from 2 to 4 because of multilingual.
         with self.assertNumQueries(4):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
@@ -484,7 +484,7 @@ class TestTemplateTags(TestCase):
 
         # Number of queries increased from 2 to 4 because of multilingual.
         with self.assertNumQueries(4):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="section1 first">'
@@ -503,7 +503,7 @@ class TestTemplateTags(TestCase):
 
         # Number of queries increased from 2 to 4 because of multilingual.
         with self.assertNumQueries(4):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                    '<li class="sub1 first">'
@@ -533,7 +533,7 @@ class TestTemplateTags(TestCase):
 
         # Number of queries increased from 2 to 3 because of multilingual.
         with self.assertNumQueries(3):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul>'
                  '<li class="home first last">'
@@ -577,7 +577,7 @@ class TestTemplateTags(TestCase):
 
         # Number of queries increased from 2 to 7 because of multilingual.
         with self.assertNumQueries(7):
-            self.assertEquals(
+            self.assertEqual(
                 condense_html_whitespace(t.render(c)),
                 ('<ul data-fiber-data=\'{ "type": "page", "add_url": "%(fiber_admin_page_add_url)s", "parent_id": %(main_page_id)d }\'>'
                    '<li class="home first last">'
