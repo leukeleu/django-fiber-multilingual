@@ -45,7 +45,7 @@ Fiber.enhance_textarea = function(textarea, auto_height) {
 		toolbarCanCollapse: window.CKEDITOR_TOOLBAR_CAN_COLLAPSE || false,
 		resize_maxWidth: window.CKEDITOR_CONFIG_MAX_WIDTH || 610,
 		baseFloatZIndex: window.CKEDITOR_BASE_FLOAT_Z_INDEX || 1100
-	});	
+	});
 };
 
 Fiber.remove_textarea = function(textarea) {
@@ -95,8 +95,7 @@ function extend_CKEditor() {
 			editor.addCommand('fpagelink', fpagelinkCmd);
 			editor.ui.addButton('fPageLink', {
 				label: gettext('Link to a Page in This Site'),
-				command: 'fpagelink',
-				icon: get_static_url() + 'fiber/images/ckeditor/icon-pagelink.png'
+				command: 'fpagelink'
 			});
 		}
 	});
@@ -139,8 +138,7 @@ function extend_CKEditor() {
 			editor.addCommand('ffilelink', ffilelinkCmd);
 			editor.ui.addButton('fFileLink', {
 				label: gettext('Link to a File in This Site'),
-				command: 'ffilelink',
-				icon: get_static_url() + 'fiber/images/ckeditor/icon-filelink.png'
+				command: 'ffilelink'
 			});
 		}
 	});
@@ -183,8 +181,7 @@ function extend_CKEditor() {
 			editor.addCommand('fimagelink', fimagelinkCmd);
 			editor.ui.addButton('fImageLink', {
 				label: gettext('Link to an Image in This Site'),
-				command: 'fimagelink',
-				icon: get_static_url() + 'fiber/images/ckeditor/icon-imagelink.png'
+				command: 'fimagelink'
 			});
 		}
 	});
@@ -220,8 +217,7 @@ function extend_CKEditor() {
 			editor.addCommand('fcustomlink', fcustomlinkCmd);
 			editor.ui.addButton('fCustomLink', {
 				label: gettext('Custom Link'),
-				command: 'fcustomlink',
-				icon: get_static_url() + 'fiber/images/ckeditor/icon-customlink.png'
+				command: 'fcustomlink'
 			});
 		}
 	});
@@ -241,8 +237,7 @@ function extend_CKEditor() {
 			editor.addCommand('funlink', funlinkCmd);
 			editor.ui.addButton('fUnlink', {
 				label: gettext('Unlink'),
-				command: 'funlink',
-				icon: get_static_url() + 'fiber/images/ckeditor/icon-unlink.png'
+				command: 'funlink'
 			});
 		}
 	});
@@ -275,8 +270,7 @@ function extend_CKEditor() {
 			editor.addCommand('fimage', fimageCmd);
 			editor.ui.addButton('fImage', {
 				label: gettext('Image'),
-				command: 'fimage',
-				icon: get_static_url() + 'fiber/images/ckeditor/icon-image.png'
+				command: 'fimage'
 			});
 		}
 	});

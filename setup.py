@@ -22,7 +22,7 @@ setup(
         'Pillow>=2.2.1',
         'django-mptt>=0.6.1',
         'django_compressor>=1.4',
-        'djangorestframework>=2.3.8',
+        'djangorestframework>=2.3.8,<3.0',
         'django-hvad',
         'easy-thumbnails>=2.2',
         'six>=1.7.3',
